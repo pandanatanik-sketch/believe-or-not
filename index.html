@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Конструктор игры «Верю / Не верю»</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    :root {
+      --bg: #f4f5fb;
+      --card-bg: #ffffff;
+      --accent: #4b6bfb;
+      --accent-soft: #e1e6ff;
+      --danger: #e05353;
+      --text-main: #1f2933;
+      --text-muted: #6b7280;
+      --border: #dde1eb;
+      --radius-lg: 18px;
+      --radius-md: 10px;
+      --shadow-soft: 0 10px 25px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #e0e7ff 0, #f4f5fb 40%, #f4f5fb 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+    }
+
+    .app {
+      max-width: 1000px;
+      width: 100%;
+      padding: 24px 16px 32px;
+    }
+
+    @media (min-width: 768px) {
+      .app {
+        padding: 32px 0 40px;
+      }
+    }
+
+    .header {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .logo-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4b6bfb, #7c3aed);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 18px;
+      box-shadow: 0 10px 25px rgba(59, 130, 246, 0.35);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 0.01em;
+    }
+
+    .subtitle {
+      margin: 0;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1.1fr 1.2fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 799px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      padding: 18px 18px 20px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid #eef0f8;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: #374151;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 4px;
+      color: var(--text-muted);
+    }
+
+    textarea,
+    input[type="text"] {
+      width: 100%;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      font-size: 14px;
+      resize: vertical;
+      min-height: 40px;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+      background: #f9fafb;
+    }
+
+    textarea:focus,
+    input[type="text"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(75, 107, 251, 0.25);
+      background: #ffffff;
+    }
+
+    textarea.question-input {
+      min-height: 80px;
+    }
+
+    .field {
+      margin-bottom: 12px;
+    }
+
+    .toggle-group {
+      display: inline-flex;
+      border-radius: 999px;
+      padding: 3px;
+      background: #f3f4ff;
+      border: 1px solid var(--accent-soft);
+      gap: 2px;
+    }
+
+    .toggle-option {
+      border: none;
+      border-radius: 999px;
+      padding: 5px 11px;
+      font-size: 13px;
+      cursor: pointer;
+      background: transparent;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background-color 0.15s, color 0.15s, transform 0.05s;
+    }
+
+    .toggle-option.active {
+      background: #fff;
+      color: var(--accent);
+      box-shadow: 0 4px 10px rgba(75, 107, 251, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .buttons-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    button.primary,
+    button.secondary,
+    button.ghost,
+    button.danger {
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      padding: 7px 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform 0.05s, box-shadow 0.1s, background-color 0.1s, opacity 0.1s;
+      white-space: nowrap;
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, #4b6bfb, #6366f1);
+      color: #fff;
+      box-shadow: 0 9px 18px rgba(79, 70, 229, 0.4);
+    }
+
+    button.primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 24px rgba(79, 70, 229, 0.45);
+    }
+
+    button.secondary {
+      background: #eef2ff;
+      color: #374151;
+    }
+
+    button.secondary:hover {
+      background: #e0e7ff;
+    }
+
+    button.ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px dashed #d1d5db;
+    }
+
+    button.ghost:hover {
+      background: #f9fafb;
+    }
+
+    button.danger {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    button.danger:hover {
+      background: #fecaca;
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: default;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .questions-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .counter-pill {
+      font-size: 12px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: #f3f4ff;
+      color: #4b5563;
+    }
+
+    .questions-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 390px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .question-item {
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      background: #f9fafb;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      column-gap: 10px;
+      row-gap: 4px;
+      align-items: center;
+    }
+
+    .question-main {
+      font-size: 14px;
+      white-space: pre-wrap;
+    }
+
+    .question-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      margin-top: 2px;
+    }
+
+    .pill {
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 11px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .pill-true {
+      background: #dcfce7;
+      border-color: #86efac;
+      color: #166534;
+    }
+
+    .pill-false {
+      background: #fee2e2;
+      border-color: #fecaca;
+      color: #b91c1c;
+    }
+
+    .question-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      align-items: flex-end;
+    }
+
+    .question-index {
+      font-size: 11px;
+      color: #text-muted;
+    }
+
+    .export-area {
+      margin-top: 8px;
+      border-radius: 12px;
+      border: 1px dashed #d1d5db;
+      padding: 8px;
+      background: #f9fafb;
+    }
+
+    .export-textarea {
+      width: 100%;
+      min-height: 70px;
+      font-size: 12px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      resize: vertical;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+        "Courier New", monospace;
+      color: #111827;
+      outline: none;
+    }
+
+    .footer {
+      margin-top: 14px;
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: right;
+    }
+
+    .footer a {
+      color: #4b6bfb;
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* мини-превью картинки в списке вопросов */
+    .image-preview-thumb {
+      margin-top: 6px;
+      max-width: 70px;
+      max-height: 70px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 1px solid #e5e7eb;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="title-row">
+        <div class="logo-circle">B?</div>
+        <div>
+          <h1>Конструктор игры «Верю / Не верю»</h1>
+          <p class="subtitle">
+            Создавай свои карточки с утверждениями, правильным ответом, пояснением и картинкой.
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <main class="layout">
+      <!-- Левая колонка: форма создания вопроса -->
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">
+            Новый вопрос
+            <span class="badge">шаг 1</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="questionText">Утверждение / вопрос</label>
+          <textarea id="questionText" class="question-input"
+            placeholder="Например: «Слон — это самое тяжёлое наземное животное»"></textarea>
+          <div class="hint">Формулировка, которую увидят игроки.</div>
+        </div>
+
+        <div class="field">
+          <label>Правильный ответ</label>
+          <div class="toggle-group" id="answerToggle">
+            <button type="button" class="toggle-option active" data-value="true">
+              ✅ Верю (правда)
+            </button>
+            <button type="button" class="toggle-option" data-value="false">
+              ❌ Не верю (ложь)
+            </button>
+          </div>
+          <div class="hint">
+            На что должен ответить ведущий: утверждение верное или нет.
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="explanation">Пояснение (необязательно)</label>
+          <textarea id="explanation" placeholder="Коротко поясни, почему это правда или ложь."></textarea>
+        </div>
+
+        <div class="field">
+          <label for="category">Категория (необязательно)</label>
+          <input type="text" id="category" placeholder="Например: Животные / Космос / История" />
+        </div>
+
+        <div class="field">
+          <label for="imageInput">Картинка (необязательно)</label>
+          <input type="file" id="imageInput" accept="image/*" />
+          <div class="hint">Картинка сохранится вместе с вопросом и будет показана в тесте.</div>
+        </div>
+
+        <div class="buttons-row">
+          <button class="primary" id="addQuestionBtn">
+            ➕ Добавить в набор
+          </button>
+          <button class="ghost" id="clearFormBtn" type="button">
+            🔄 Очистить поля
+          </button>
+        </div>
+      </section>
+
+      <!-- Правая колонка: список вопросов и экспорт -->
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">
+            Набор вопросов
+            <span class="badge">шаг 2</span>
+          </div>
+          <span class="counter-pill">
+            Всего: <span id="questionsCount">0</span>
+          </span>
+        </div>
+
+        <div class="questions-list" id="questionsList">
+          <!-- Вопросы появятся здесь -->
+        </div>
+
+        <div class="buttons-row" style="margin-top: 10px;">
+          <!-- Открытие теста в отдельном окне -->
+          <button class="primary" type="button" onclick="window.open('test.html', '_blank')">
+            🧪 Открыть тест
+          </button>
+          <button class="secondary" id="exportBtn" type="button">
+            ⬇️ Экспортировать в JSON
+          </button>
+          <button class="danger" id="clearAllBtn" type="button">
+            🗑 Очистить всё
+          </button>
+        </div>
+
+        <div class="export-area" id="exportArea" style="display: none;">
+          <label style="font-size: 12px; margin-bottom: 4px; display: block;">
+            Скопируй JSON или скачай файл:
+          </label>
+          <textarea class="export-textarea" id="exportTextarea" readonly></textarea>
+          <div class="buttons-row" style="margin-top: 6px;">
+            <button class="secondary" id="copyJsonBtn" type="button">
+              📋 Скопировать JSON
+            </button>
+            <button class="secondary" id="downloadJsonBtn" type="button">
+              💾 Скачать JSON
+            </button>
+            <button class="ghost" id="hideExportBtn" type="button">
+              🙈 Скрыть
+            </button>
+          </div>
+        </div>
+
+        <div class="footer">
+          Сделано с нуля ✨
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // -----------------------------
+    // Состояние
+    // -----------------------------
+    let questions = [];
+    let currentCorrectAnswer = true; // true = "верю", false = "не верю"
+    const STORAGE_KEY = "believe_or_not_questions_v1";
+
+    // -----------------------------
+    // Элементы DOM
+    // -----------------------------
+    const questionTextEl = document.getElementById("questionText");
+    const explanationEl = document.getElementById("explanation");
+    const categoryEl = document.getElementById("category");
+    const imageInputEl = document.getElementById("imageInput");
+
+    const questionsListEl = document.getElementById("questionsList");
+    const questionsCountEl = document.getElementById("questionsCount");
+    const addQuestionBtn = document.getElementById("addQuestionBtn");
+    const clearFormBtn = document.getElementById("clearFormBtn");
+    const clearAllBtn = document.getElementById("clearAllBtn");
+    const exportBtn = document.getElementById("exportBtn");
+    const exportAreaEl = document.getElementById("exportArea");
+    const exportTextareaEl = document.getElementById("exportTextarea");
+    const downloadJsonBtn = document.getElementById("downloadJsonBtn");
+    const hideExportBtn = document.getElementById("hideExportBtn");
+    const copyJsonBtn = document.getElementById("copyJsonBtn");
+    const answerToggleEl = document.getElementById("answerToggle");
+
+    // -----------------------------
+    // Инициализация
+    // -----------------------------
+    loadFromStorage();
+    renderQuestions();
+
+    // -----------------------------
+    // Переключатель "верю / не верю"
+    // -----------------------------
+    answerToggleEl.addEventListener("click", (event) => {
+      const btn = event.target.closest(".toggle-option");
+      if (!btn) return;
+
+      const value = btn.getAttribute("data-value");
+      currentCorrectAnswer = value === "true";
+
+      const allOptions = answerToggleEl.querySelectorAll(".toggle-option");
+      allOptions.forEach((opt) => opt.classList.remove("active"));
+      btn.classList.add("active");
+    });
+
+    // -----------------------------
+    // Добавление вопроса (с картинкой)
+    // -----------------------------
+    addQuestionBtn.addEventListener("click", (event) => {
+      event.preventDefault();
+
+      const text = questionTextEl.value.trim();
+      const explanation = explanationEl.value.trim();
+      const category = categoryEl.value.trim();
+      const file = imageInputEl.files[0] || null;
+
+      if (!text) {
+        alert("Пожалуйста, напиши текст утверждения или вопроса.");
+        questionTextEl.focus();
+        return;
+      }
+
+      const baseQuestion = {
+        id: Date.now(),
+        text,
+        correct: currentCorrectAnswer,
+        explanation: explanation || null,
+        category: category || null,
+        imageData: null,
+      };
+
+      if (!file) {
+        questions.push(baseQuestion);
+        saveToStorage();
+        renderQuestions();
+        resetForm();
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        baseQuestion.imageData = e.target.result;
+        questions.push(baseQuestion);
+        saveToStorage();
+        renderQuestions();
+        resetForm();
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // -----------------------------
+    // Очистка формы
+    // -----------------------------
+    clearFormBtn.addEventListener("click", () => {
+      resetForm();
+    });
+
+    function resetForm() {
+      questionTextEl.value = "";
+      explanationEl.value = "";
+      categoryEl.value = "";
+      imageInputEl.value = "";
+      questionTextEl.focus();
+    }
+
+    // -----------------------------
+    // Отрисовка списка вопросов
+    // -----------------------------
+    function renderQuestions() {
+      questionsListEl.innerHTML = "";
+
+      if (questions.length === 0) {
+        questionsListEl.innerHTML =
+          '<div style="font-size: 13px; color: #9ca3af;">Пока нет ни одного вопроса. Добавь первый в левой колонке.</div>';
+      } else {
+        questions.forEach((q, index) => {
+          const item = document.createElement("div");
+          item.className = "question-item";
+
+          const main = document.createElement("div");
+          main.className = "question-main";
+
+          const textEl = document.createElement("div");
+          textEl.textContent = q.text;
+          main.appendChild(textEl);
+
+          if (q.imageData) {
+            const img = document.createElement("img");
+            img.src = q.imageData;
+            img.alt = "Картинка к вопросу";
+            img.className = "image-preview-thumb";
+            main.appendChild(img);
+          }
+
+          const meta = document.createElement("div");
+          meta.className = "question-meta";
+
+          const answerPill = document.createElement("span");
+          answerPill.className =
+            "pill " + (q.correct ? "pill-true" : "pill-false");
+          answerPill.textContent = q.correct ? "✅ Верно" : "❌ Неверно";
+          meta.appendChild(answerPill);
+
+          if (q.category) {
+            const catPill = document.createElement("span");
+            catPill.className = "pill";
+            catPill.textContent = q.category;
+            meta.appendChild(catPill);
+          }
+
+          if (q.explanation) {
+            const explSpan = document.createElement("span");
+            explSpan.textContent = "Пояснение есть";
+            meta.appendChild(explSpan);
+          }
+
+          main.appendChild(meta);
+
+          const actions = document.createElement("div");
+          actions.className = "question-actions";
+
+          const indexEl = document.createElement("div");
+          indexEl.className = "question-index";
+          indexEl.textContent = `#${index + 1}`;
+          actions.appendChild(indexEl);
+
+          const deleteBtn = document.createElement("button");
+          deleteBtn.className = "ghost";
+          deleteBtn.type = "button";
+          deleteBtn.textContent = "Удалить";
+          deleteBtn.addEventListener("click", () => {
+            deleteQuestion(q.id);
+          });
+
+          actions.appendChild(deleteBtn);
+
+          item.appendChild(main);
+          item.appendChild(actions);
+
+          questionsListEl.appendChild(item);
+        });
+      }
+
+      questionsCountEl.textContent = String(questions.length);
+    }
+
+    function deleteQuestion(id) {
+      questions = questions.filter((q) => q.id !== id);
+      saveToStorage();
+      renderQuestions();
+    }
+
+    // -----------------------------
+    // Хранение в LocalStorage
+    // -----------------------------
+    function saveToStorage() {
+      try {
+        const data = JSON.stringify(questions);
+        localStorage.setItem(STORAGE_KEY, data);
+      } catch (e) {
+        console.warn("Не удалось сохранить данные в LocalStorage:", e);
+      }
+    }
+
+    function loadFromStorage() {
+      try {
+        const data = localStorage.getItem(STORAGE_KEY);
+        if (data) {
+          questions = JSON.parse(data);
+        }
+      } catch (e) {
+        console.warn("Не удалось загрузить данные из LocalStorage:", e);
+        questions = [];
+      }
+    }
+
+    // -----------------------------
+    // Экспорт в JSON
+    // -----------------------------
+    exportBtn.addEventListener("click", () => {
+      if (questions.length === 0) {
+        alert("Нечего экспортировать — список вопросов пуст.");
+        return;
+      }
+
+      const exportData = {
+        type: "believe_or_not",
+        createdAt: new Date().toISOString(),
+        items: questions,
+      };
+
+      const json = JSON.stringify(exportData, null, 2);
+      exportTextareaEl.value = json;
+      exportAreaEl.style.display = "block";
+    });
+
+    hideExportBtn.addEventListener("click", () => {
+      exportAreaEl.style.display = "none";
+    });
+
+    downloadJsonBtn.addEventListener("click", () => {
+      const content = exportTextareaEl.value.trim();
+      if (!content) return;
+
+      const blob = new Blob([content], { type: "application/json;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      const date = new Date().toISOString().slice(0, 10);
+      link.href = url;
+      link.download = `believe_or_not_${date}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      URL.revokeObjectURL(url);
+    });
+
+    // -----------------------------
+    // Копировать JSON в буфер
+    // -----------------------------
+    copyJsonBtn.addEventListener("click", () => {
+      const text = exportTextareaEl.value.trim();
+      if (!text) {
+        alert("Нет данных для копирования.");
+        return;
+      }
+
+      // Современный способ
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text)
+          .then(() => showCopiedState())
+          .catch(() => fallbackCopy(text));
+      } else {
+        fallbackCopy(text);
+      }
+    });
+
+    function fallbackCopy(text) {
+      try {
+        const temp = document.createElement("textarea");
+        temp.value = text;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand("copy");
+        document.body.removeChild(temp);
+        showCopiedState();
+      } catch (e) {
+        alert("Не получилось скопировать 😢");
+      }
+    }
+
+    function showCopiedState() {
+      const original = copyJsonBtn.textContent;
+      copyJsonBtn.textContent = "✔ Скопировано!";
+      setTimeout(() => {
+        copyJsonBtn.textContent = original;
+      }, 1500);
+    }
+
+    // -----------------------------
+    // Очистить всё
+    // -----------------------------
+    clearAllBtn.addEventListener("click", () => {
+      if (!questions.length) return;
+      const ok = confirm(
+        "Точно удалить все вопросы? Отменить это действие будет нельзя."
+      );
+      if (!ok) return;
+
+      questions = [];
+      saveToStorage();
+      renderQuestions();
+      exportAreaEl.style.display = "none";
+    });
+  </script>
+</body>
+
+</html>
