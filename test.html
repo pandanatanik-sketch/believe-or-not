@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Тест</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- ✅ CSS отдельно -->
+  <link rel="stylesheet" href="test.css" />
+</head>
+
+<body>
+  <div class="card" id="card">
+    <!-- Стартовый экран -->
+    <div id="startScreen">
+      <div class="top-row">
+        <div class="title" id="testTitleStart">Тест</div>
+        <a class="channel-btn" href="https://t.me/tutor_Natalya" target="_blank">✨ Мой канал</a>
+      </div>
+
+      <div class="subtitle" id="startSubtitle"></div>
+
+      <button class="start-btn" id="startBtn">▶️ Начать тест</button>
+    </div>
+
+    <!-- Экран теста -->
+    <div id="testScreen" style="display:none;">
+      <div class="top-row">
+        <div class="title" id="testTitleTop">Тест</div>
+        <a class="channel-btn" href="https://t.me/tutor_Natalya" target="_blank">✨ Мой канал</a>
+      </div>
+
+      <div id="category" class="category"></div>
+      <div id="question" class="question"></div>
+
+      <img id="questionImage" class="question-image" src="" alt="Картинка к вопросу" style="display:none;" />
+
+      <!-- Блок ответов (динамический) -->
+      <div id="answersArea"></div>
+
+      <!-- Кнопка следующий -->
+      <button class="next-btn" id="btnNext" style="display:none;">➡️ Следующий</button>
+
+      <div id="feedback" class="feedback"></div>
+
+      <div id="explanationBox" class="explanation-box" style="display:none;">
+        <div id="explanationText" class="explanation-text"></div>
+        <img id="explanationImage" class="explanation-image" src="" alt="Картинка к пояснению" style="display:none;" />
+      </div>
+
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <!-- Экран результата -->
+    <div id="resultScreen" style="display:none;">
+      <div class="top-row">
+        <div class="title" id="testTitleResult">Результат</div>
+        <a class="channel-btn" href="https://t.me/tutor_Natalya" target="_blank">✨ Мой канал</a>
+      </div>
+
+      <div class="result-grid">
+        <div class="result-left">
+          <div class="score-big" id="scoreBig"></div>
+
+          <div class="circle-wrap">
+            <canvas id="scoreCanvas" width="180" height="180"></canvas>
+            <div class="circle-text">
+              <div class="circle-percent" id="percentText"></div>
+              <div class="circle-label">правильных</div>
+            </div>
+          </div>
+
+          <div class="result-meta" id="resultMeta"></div>
+
+          <div class="btn-row">
+            <button class="primary-btn" id="restartBtn">🔁 Пройти ещё раз</button>
+            <button class="secondary-btn" id="retryWrongBtn" style="display:none;">🎯 Пройти только ошибки</button>
+          </div>
+
+          <div class="btn-row" style="margin-top:10px;">
+            <button class="ghost-btn" id="downloadPngBtn">📸 Скачать PNG</button>
+          </div>
+        </div>
+
+        <div class="result-right">
+          <div class="errors-title">Ошибки</div>
+          <div class="errors-list" id="errorsList"></div>
+        </div>
+      </div>
+
+      <!-- Скрытый блок для рендера PNG -->
+      <div id="pngRender" class="png-render" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- ✅ JS отдельно -->
+   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="test.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Конструктор игры «Верю / Не верю»</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- ✅ CSS отдельно -->
+  <link rel="stylesheet" href="index.css" />
+</head>
+
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="title-row">
+        <div class="logo-circle">🎲</div>
+        <div>
+          <h1>Конструктор тестов</h1>
+        </div>
+      </div>
+    </header>
+
+    <main class="layout">
+      <!-- LEFT: MY TESTS -->
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">
+            Мои тесты
+            <span class="badge">шаг 1</span>
+          </div>
+          <button class="primary mini-btn" id="newTestBtn">➕ Новый</button>
+        </div>
+
+        <div class="tests-list" id="testsList"></div>
+
+        <div class="sep"></div>
+
+        <div class="small-muted">
+          💡 Выбери тест слева — и редактируй его справа.  
+          Тест автоматически сохраняется в браузере.
+        </div>
+      </section>
+
+      <!-- RIGHT: EDITOR -->
+      <section class="card" id="editorCard">
+        <div class="card-header">
+          <div class="card-title">
+            Редактор теста
+            <span class="badge">шаг 2</span>
+          </div>
+          <span class="counter-pill">
+            Вопросов: <span id="questionsCount">0</span>
+          </span>
+        </div>
+
+        <div class="field">
+          <label for="testNameInput">Название теста</label>
+          <input type="text" id="testNameInput" placeholder="Например: Unit 5 — Animals" />
+        </div>
+
+        <div class="field">
+          <div class="toggle-row">
+            <div class="toggle-left">
+              <div class="toggle-title">🔀 Перемешивать вопросы перед тестом</div>
+              <div class="small-muted">Если включено — вопросы будут перемешаны при старте теста.</div>
+            </div>
+
+            <label class="switch" title="Перемешивание вопросов">
+              <input type="checkbox" id="shuffleToggle">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <!-- NEW QUESTION -->
+        <div class="card-header" style="margin-bottom:10px;">
+          <div class="card-title">
+            Новый вопрос
+            <span class="badge">добавление</span>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label for="qType">Тип вопроса</label>
+            <select id="qType">
+              <option value="true_false">Верю / Не верю</option>
+              <option value="multiple_choice">Multiple choice</option>
+              <option value="open_answer">Open answer</option>
+            </select>
+            <div class="hint">Выбери тип — ниже появятся нужные поля.</div>
+          </div>
+
+          <div class="field">
+            <label for="qCategory">Категория (необязательно)</label>
+            <input type="text" id="qCategory" placeholder="Например: Animals / Grammar / History" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="qText">Текст вопроса / утверждения</label>
+          <textarea id="qText" placeholder="Например: «Слон — самое тяжёлое наземное животное»"></textarea>
+        </div>
+
+        <!-- True/False -->
+        <div class="field" id="tfBlock">
+          <label>Правильный ответ</label>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="secondary" id="btnSetTrue">✅ Верю (правда)</button>
+            <button class="secondary" id="btnSetFalse">❌ Не верю (ложь)</button>
+          </div>
+          <div class="hint">Выбери, какой ответ будет правильным.</div>
+        </div>
+
+        <!-- Multiple Choice -->
+        <div class="field" id="mcBlock" style="display:none;">
+          <label>Варианты ответа + правильный вариант</label>
+          <div class="image-picker">
+            <div id="mcList"></div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-top:10px;">
+              <button class="secondary" type="button" id="mcAddOptionBtn">➕ Добавить вариант</button>
+              <div class="small-muted">✅ Отметь кружком правильный ответ. Можно 2–8 вариантов.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Open Answer -->
+        <div class="field" id="openBlock" style="display:none;">
+          <label for="openCorrectText">Правильный ответ (текст)</label>
+          <input type="text" id="openCorrectText" placeholder="Например: H2O" />
+          <div class="hint">Ответ ученика будет сравниваться (без учета регистра).</div>
+        </div>
+
+        <!-- Images -->
+        <div class="field">
+          <label>Картинка к вопросу (GitHub)</label>
+          <div class="image-picker">
+            <div class="image-picker-top">
+              <label class="file-btn">
+                📎 Выбрать файл
+                <input type="file" id="qImageFile" accept="image/*" style="display:none;">
+              </label>
+              <div class="file-name" id="qImageFileName">Файл не выбран</div>
+            </div>
+
+            <img id="qImagePreview" class="preview" alt="Превью картинки к вопросу">
+
+            <div class="field" style="margin-top:10px; margin-bottom:0;">
+              <label for="qImageUrl">Путь к картинке (будет сохранён)</label>
+              <input type="text" id="qImageUrl" placeholder="images/cat.jpg" />
+              <div class="hint">
+                Автоматически ставим: <b>images/имяФайла</b>.  
+                ⚠️ Не забудь загрузить файл в GitHub → папку <b>/images</b>.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Картинка к пояснению (GitHub)</label>
+          <div class="image-picker">
+            <div class="image-picker-top">
+              <label class="file-btn">
+                📎 Выбрать файл
+                <input type="file" id="qExpImageFile" accept="image/*" style="display:none;">
+              </label>
+              <div class="file-name" id="qExpImageFileName">Файл не выбран</div>
+            </div>
+
+            <img id="qExpImagePreview" class="preview" alt="Превью картинки к пояснению">
+
+            <div class="field" style="margin-top:10px; margin-bottom:0;">
+              <label for="qExplanationImageUrl">Путь к картинке (будет сохранён)</label>
+              <input type="text" id="qExplanationImageUrl" placeholder="images/expl.jpg" />
+              <div class="hint">
+                Появится в тесте при неправильном ответе.  
+                ⚠️ Не забудь загрузить файл в GitHub → папку <b>/images</b>.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="qExplanation">Пояснение (необязательно)</label>
+          <textarea id="qExplanation" placeholder="Коротко поясни, почему это верно/неверно."></textarea>
+          <div class="hint">Покажется только если ученик ответил неправильно.</div>
+        </div>
+
+        <div class="footer-actions">
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="primary" id="addQuestionBtn">➕ Добавить вопрос</button>
+            <button class="ghost" id="clearFormBtn" type="button">🔄 Очистить</button>
+          </div>
+
+          <a class="channel-link" href="https://t.me/tutor_Natalya" target="_blank">✨ Мой канал</a>
+        </div>
+
+        <!-- QUESTIONS LIST -->
+        <div class="sep"></div>
+
+        <div class="questions-header">
+          <div class="card-title">
+            Вопросы (перетаскивай мышкой)
+            <span class="badge">drag&drop</span>
+          </div>
+          <span class="counter-pill">
+            Всего: <span id="questionsCount2">0</span>
+          </span>
+        </div>
+
+        <div class="questions-list" id="questionsList"></div>
+
+        <!-- ACTIONS -->
+        <div class="sep"></div>
+
+        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:space-between;">
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="primary" type="button" id="openTestBtn">🧪 Открыть тест</button>
+            <button class="secondary" type="button" id="exportBtn">⬇️ Экспорт JSON</button>
+            <button class="danger" type="button" id="clearQuestionsBtn">🗑 Очистить вопросы</button>
+          </div>
+
+          <div class="small-muted">
+            ✅ Всё сохраняется автоматически
+          </div>
+        </div>
+
+        <div class="export-area" id="exportArea" style="display:none;">
+          <label style="font-size: 12px; margin-bottom: 6px; display: block; font-weight:800;">
+            JSON этого теста:
+          </label>
+          <textarea class="export-textarea" id="exportTextarea" readonly></textarea>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
+            <button class="secondary" id="copyJsonBtn" type="button">📋 Копировать</button>
+            <button class="secondary" id="downloadJsonBtn" type="button">💾 Скачать</button>
+            <button class="ghost" id="hideExportBtn" type="button">🙈 Скрыть</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL: Edit Question -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal">
+      <div class="modal-head">
+        <div class="modal-title" id="modalTitle">Редактирование</div>
+        <button class="modal-close" id="modalCloseBtn">×</button>
+      </div>
+
+      <div id="modalContent"></div>
+
+      <div class="modal-actions">
+        <button class="ghost" id="modalCancelBtn">Отмена</button>
+        <button class="primary" id="modalSaveBtn">💾 Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ JS отдельно -->
+  <script src="index.js"></script>
+</body>
+
+</html>

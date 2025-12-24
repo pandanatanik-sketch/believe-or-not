@@ -1,0 +1,385 @@
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  padding: 20px;
+  background: #f4f5fb;
+  color: #1f2933;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card {
+  background: #ffffff;
+  padding: 20px 20px 24px;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.18);
+  max-width: 780px;
+  width: 100%;
+}
+
+.top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 14px;
+  line-height: 1.35;
+}
+
+.start-btn {
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  background: #4b6bfb;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  box-shadow: 0 10px 20px rgba(79, 70, 229, 0.25);
+}
+
+.start-btn:hover {
+  transform: translateY(-1px);
+}
+
+.channel-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 12px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #4b6bfb;
+  text-decoration: none;
+  font-weight: 850;
+  font-size: 12px;
+  border: 1px solid #e0e7ff;
+}
+
+.channel-btn:hover {
+  background: #e0e7ff;
+}
+
+.category {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+.question {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  white-space: pre-wrap;
+}
+
+.question-image {
+  max-width: 100%;
+  max-height: 260px;
+  border-radius: 12px;
+  object-fit: contain;
+  margin-bottom: 14px;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.18);
+}
+
+#answersArea {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.answer-btn {
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 800;
+}
+
+.true-btn {
+  background: #4ade80;
+  color: #064e3b;
+}
+
+.false-btn {
+  background: #f87171;
+  color: #7f1d1d;
+}
+
+.option-btn {
+  background: #eef2ff;
+  color: #111827;
+  border: 1px solid #e0e7ff;
+}
+
+.option-btn.selected {
+  background: #4b6bfb;
+  color: #fff;
+  border-color: #4b6bfb;
+}
+
+.input-open {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #dde1eb;
+  border-radius: 12px;
+  outline: none;
+  background: #f9fafb;
+  font-size: 15px;
+}
+
+.submit-open-btn {
+  margin-top: 10px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 800;
+  background: #4b6bfb;
+  color: #fff;
+}
+
+.next-btn {
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 800;
+  background: #e5e7eb;
+  color: #111827;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.feedback {
+  font-size: 15px;
+  margin-bottom: 10px;
+  min-height: 20px;
+}
+
+.feedback.correct {
+  color: #15803d;
+  font-weight: 800;
+}
+
+.feedback.incorrect {
+  color: #b91c1c;
+  font-weight: 800;
+}
+
+.explanation-box {
+  background: #f9fafb;
+  border: 1px solid #eef0f8;
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.explanation-text {
+  font-size: 14px;
+  color: #111827;
+  line-height: 1.35;
+}
+
+.explanation-image {
+  margin-top: 10px;
+  max-width: 100%;
+  max-height: 240px;
+  border-radius: 12px;
+  object-fit: contain;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+}
+
+.progress {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 6px;
+}
+
+/* RESULT */
+.result-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+@media (max-width: 820px) {
+  .result-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.result-left {
+  background: #f9fafb;
+  border: 1px solid #eef0f8;
+  border-radius: 16px;
+  padding: 14px;
+}
+
+.score-big {
+  font-size: 20px;
+  font-weight: 900;
+  margin-bottom: 10px;
+}
+
+.circle-wrap {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  margin: 12px auto 10px;
+}
+
+.circle-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.circle-percent {
+  font-size: 26px;
+  font-weight: 900;
+}
+
+.circle-label {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.result-meta {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.btn-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.primary-btn,
+.secondary-btn,
+.ghost-btn {
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 850;
+}
+
+.primary-btn {
+  background: #4b6bfb;
+  color: #fff;
+  box-shadow: 0 10px 20px rgba(79, 70, 229, 0.22);
+}
+
+.secondary-btn {
+  background: #eef2ff;
+  color: #374151;
+  border: 1px solid #e0e7ff;
+}
+
+.ghost-btn {
+  background: transparent;
+  border: 1px dashed #d1d5db;
+  color: #6b7280;
+}
+
+.result-right {
+  background: #ffffff;
+  border: 1px solid #eef0f8;
+  border-radius: 16px;
+  padding: 14px;
+}
+
+.errors-title {
+  font-weight: 900;
+  margin-bottom: 10px;
+}
+
+.errors-list {
+  display: grid;
+  gap: 10px;
+}
+
+.error-card {
+  border-radius: 14px;
+  border: 1px solid #dde1eb;
+  padding: 10px;
+  background: #f9fafb;
+}
+
+.error-head {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.error-number {
+  font-weight: 900;
+  color: #b91c1c;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.error-qtext {
+  font-weight: 800;
+  font-size: 13px;
+  color: #111827;
+  margin-top: 4px;
+}
+
+.error-line {
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.error-line b {
+  font-weight: 900;
+}
+
+/* PNG render container */
+.png-render {
+  width: 980px;
+  padding: 18px;
+  background: #ffffff;
+  color: #111827;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
