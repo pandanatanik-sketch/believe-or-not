@@ -1,4 +1,5 @@
 // ===== test.js =====
+alert("JS загрузился ✅");
 
 // Где хранятся тесты (созданы в index)
 const TESTS_KEY = "believe_or_not_tests_v2";
@@ -723,3 +724,4 @@ async function downloadResultPNG() {
 // RUN
 // --------------------
 init();
+
