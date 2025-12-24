@@ -1,0 +1,41 @@
+{
+  "id": "1766601951696",
+  "name": "aigd",
+  "createdAt": "2025-12-24T18:45:51.696Z",
+  "updatedAt": "2025-12-24T18:46:07.524Z",
+  "settings": {
+    "shuffleEnabled": false
+  },
+  "items": [
+    {
+      "id": 1766601959393,
+      "type": "true_false",
+      "text": "x",
+      "category": null,
+      "explanation": null,
+      "imageUrl": null,
+      "explanationImageUrl": null,
+      "correct": true
+    },
+    {
+      "id": 1766601963834,
+      "type": "true_false",
+      "text": "xx",
+      "category": null,
+      "explanation": null,
+      "imageUrl": null,
+      "explanationImageUrl": null,
+      "correct": true
+    },
+    {
+      "id": 1766601967524,
+      "type": "true_false",
+      "text": "xxx",
+      "category": null,
+      "explanation": null,
+      "imageUrl": null,
+      "explanationImageUrl": null,
+      "correct": true
+    }
+  ]
+}
