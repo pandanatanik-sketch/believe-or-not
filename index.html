@@ -608,7 +608,7 @@
     function openTest() {
       if (!activeTestId) return;
       // открываем test_local.html с параметром ?id=...
-      window.open(`test.html?id=${activeTestId}`, "_blank");
+      window.open(`test_local.html?id=${activeTestId}`, "_blank");
     }
 
     openTestBtn.addEventListener("click", openTest);
