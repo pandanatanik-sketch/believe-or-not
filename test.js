@@ -3,6 +3,30 @@
 // Где хранятся тесты (созданы в index)
 const TESTS_KEY = "believe_or_not_tests_v2";
 const ACTIVE_TEST_ID_KEY = "believe_or_not_active_test_id_v2";
+function getJsonUrlFromQuery() {
+  const params = new URLSearchParams(window.location.search);
+  const json = params.get("json");
+  return json ? json.trim() : null;
+}
+
+async function loadTestFromJsonUrl(jsonPath) {
+  // jsonPath будет вроде "tests/mytest.json"
+  const res = await fetch(jsonPath, { cache: "no-store" });
+  if (!res.ok) throw new Error("Не удалось загрузить JSON: " + res.status);
+
+  const data = await res.json();
+
+  // поддержка двух форматов:
+  // 1) файл = { name, items, settings }
+  // 2) файл = { type, createdAt, items } + name отдельно отсутствует
+  return {
+    id: "external_json_" + Date.now(),
+    name: data.name || data.testName || "Тест",
+    items: data.items || [],
+    settings: data.settings || { shuffleEnabled: false }
+  };
+}
+
 
 // --------------------
 // DOM
@@ -113,50 +137,31 @@ function loadActiveTest() {
   }
 }
 
-function init() {
-  testData = loadActiveTest();
+async function init() {
+  const jsonPath = getJsonUrlFromQuery();
 
-  if (!testData || !testData.items || !testData.items.length) {
-    cardEl.innerHTML = `
-      <div style="font-size:18px;font-weight:900;margin-bottom:6px;">Вопросы не найдены</div>
-      <div style="font-size:13px;color:#6b7280;line-height:1.4;">
-        Похоже, в выбранном тесте нет вопросов.<br>
-        Открой конструктор (index.html), добавь вопросы — и затем снова зайди сюда.
-      </div>
-      <div style="margin-top:12px;">
-        <a class="channel-btn" href="https://t.me/tutor_Natalya" target="_blank">✨ Мой канал</a>
-      </div>
-    `;
-    return;
+  if (jsonPath) {
+    try {
+      testData = await loadTestFromJsonUrl(jsonPath);
+    } catch (e) {
+      cardEl.innerHTML = `
+        <div style="font-size:18px;font-weight:900;margin-bottom:6px;">Ошибка загрузки теста</div>
+        <div style="font-size:13px;color:#6b7280;line-height:1.4;">
+          Не удалось загрузить тест по ссылке:<br>
+          <b>${jsonPath}</b><br><br>
+          ${e}
+        </div>
+        <div style="margin-top:12px;">
+          <a class="channel-btn" href="https://t.me/tutor_Natalya" target="_blank">✨ Мой канал</a>
+        </div>
+      `;
+      return;
+    }
+  } else {
+    // обычный режим: тест из localStorage
+    testData = loadActiveTest();
   }
 
-  const testName = testData.name || "Тест";
-  testTitleStart.textContent = testName;
-  testTitleTop.textContent = testName;
-  testTitleResult.textContent = "Результат — " + testName;
-
-  originalQuestions = testData.items.slice();
-
-  // Подзаголовок на стартовом экране
-  const shuffleEnabled = !!testData.settings?.shuffleEnabled;
-  startSubtitle.textContent = shuffleEnabled
-    ? "Вопросы будут перемешаны перед началом теста."
-    : "";
-
-  startBtn.addEventListener("click", startTest);
-
-  restartBtn.addEventListener("click", () => {
-    onlyWrongMode = false;
-    startTest();
-  });
-
-  retryWrongBtn.addEventListener("click", () => {
-    onlyWrongMode = true;
-    startTest();
-  });
-
-  downloadPngBtn.addEventListener("click", downloadResultPNG);
-}
 
 // --------------------
 // Start / Restart
