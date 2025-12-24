@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Конструктор игры «Верю / Не верю» (локальная версия)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    :root {
+      --bg: #f4f5fb;
+      --card-bg: #ffffff;
+      --accent: #4b6bfb;
+      --accent-soft: #e1e6ff;
+      --danger: #e05353;
+      --text-main: #1f2933;
+      --text-muted: #6b7280;
+      --border: #dde1eb;
+      --radius-lg: 18px;
+      --radius-md: 10px;
+      --shadow-soft: 0 10px 25px rgba(15, 23, 42, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #e0e7ff 0, #f4f5fb 40%, #f4f5fb 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+    }
+
+    .app {
+      max-width: 1050px;
+      width: 100%;
+      padding: 24px 16px 32px;
+    }
+
+    @media (min-width: 768px) {
+      .app { padding: 32px 0 40px; }
+    }
+
+    .header {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .logo-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4b6bfb, #7c3aed);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 18px;
+      box-shadow: 0 10px 25px rgba(59, 130, 246, 0.35);
+    }
+
+    h1 { margin: 0; font-size: 22px; letter-spacing: 0.01em; }
+
+    .subtitle { margin: 0; font-size: 14px; color: var(--text-muted); }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr 1.1fr;
+      gap: 18px;
+    }
+
+    @media (max-width: 980px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      padding: 18px 18px 20px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid #eef0f8;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: #374151;
+    }
+
+    label { display: block; font-size: 13px; margin-bottom: 4px; color: var(--text-muted); }
+
+    textarea, input[type="text"] {
+      width: 100%;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      font-size: 14px;
+      resize: vertical;
+      min-height: 40px;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+      background: #f9fafb;
+    }
+
+    textarea:focus, input[type="text"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(75, 107, 251, 0.25);
+      background: #ffffff;
+    }
+
+    textarea.question-input { min-height: 80px; }
+
+    .field { margin-bottom: 12px; }
+
+    .toggle-group {
+      display: inline-flex;
+      border-radius: 999px;
+      padding: 3px;
+      background: #f3f4ff;
+      border: 1px solid var(--accent-soft);
+      gap: 2px;
+    }
+
+    .toggle-option {
+      border: none;
+      border-radius: 999px;
+      padding: 5px 11px;
+      font-size: 13px;
+      cursor: pointer;
+      background: transparent;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background-color 0.15s, color 0.15s, transform 0.05s;
+    }
+
+    .toggle-option.active {
+      background: #fff;
+      color: var(--accent);
+      box-shadow: 0 4px 10px rgba(75, 107, 251, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .hint { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    .buttons-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    button.primary, button.secondary, button.ghost, button.danger {
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      padding: 7px 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform 0.05s, box-shadow 0.1s, background-color 0.1s, opacity 0.1s;
+      white-space: nowrap;
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, #4b6bfb, #6366f1);
+      color: #fff;
+      box-shadow: 0 9px 18px rgba(79, 70, 229, 0.4);
+    }
+
+    button.primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 24px rgba(79, 70, 229, 0.45);
+    }
+
+    button.secondary { background: #eef2ff; color: #374151; }
+    button.secondary:hover { background: #e0e7ff; }
+
+    button.ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px dashed #d1d5db;
+    }
+
+    button.ghost:hover { background: #f9fafb; }
+
+    button.danger { background: #fee2e2; color: #b91c1c; }
+    button.danger:hover { background: #fecaca; }
+
+    button:disabled { opacity: 0.55; cursor: default; box-shadow: none; transform: none; }
+
+    .questions-list, .tests-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 420px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .question-item, .test-item {
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      padding: 10px 10px;
+      background: #f9fafb;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      column-gap: 10px;
+      row-gap: 6px;
+      align-items: center;
+    }
+
+    .question-main, .test-main {
+      font-size: 14px;
+      white-space: pre-wrap;
+    }
+
+    .question-meta, .test-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      margin-top: 2px;
+    }
+
+    .pill {
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 11px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .pill-true { background: #dcfce7; border-color: #86efac; color: #166534; }
+    .pill-false { background: #fee2e2; border-color: #fecaca; color: #b91c1c; }
+
+    .question-actions, .test-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: flex-end;
+    }
+
+    .question-index { font-size: 11px; color: var(--text-muted); }
+
+    .image-preview-thumb {
+      margin-top: 6px;
+      max-width: 70px;
+      max-height: 70px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 1px solid #e5e7eb;
+    }
+
+    .form-preview {
+      margin-top: 8px;
+      display: none;
+      max-width: 100%;
+      max-height: 220px;
+      border-radius: 14px;
+      object-fit: contain;
+      box-shadow: 0 8px 16px rgba(15, 23, 42, 0.12);
+      border: 1px solid #eef0f8;
+      background: #fff;
+    }
+
+    .selected-test {
+      border: 1px solid rgba(75, 107, 251, 0.35);
+      background: #f3f4ff;
+    }
+
+    /* ✨ footer + кнопка канала */
+    .footer {
+      margin-top: 14px;
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: right;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .channel-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #4b6bfb;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 12px;
+      border: 1px solid #e0e7ff;
+      transition: transform 0.05s, box-shadow 0.1s, background-color 0.1s;
+    }
+
+    .channel-btn:hover {
+      background: #e0e7ff;
+      box-shadow: 0 8px 18px rgba(75, 107, 251, 0.22);
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="title-row">
+        <div class="logo-circle">✅❌</div>
+        <div>
+          <h1>Конструктор игры «Верю / Не верю»</h1>
+          <p class="subtitle">Локальная библиотека тестов — всё хранится в этом браузере.</p>
+        </div>
+      </div>
+    </header>
+
+    <main class="layout">
+      <!-- 1) Библиотека тестов -->
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">
+            Мои тесты <span class="badge">шаг 0</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="testTitle">Название нового теста</label>
+          <input type="text" id="testTitle" placeholder="Например: Животные / История / Новый год" />
+          <div class="hint">Нажми «Создать», чтобы начать добавлять вопросы.</div>
+        </div>
+
+        <div class="buttons-row">
+          <button class="primary" id="createTestBtn">➕ Создать</button>
+          <button class="secondary" id="saveTestBtn" disabled>💾 Сохранить</button>
+        </div>
+
+        <div style="height:10px;"></div>
+
+        <div class="tests-list" id="testsList"></div>
+      </section>
+
+      <!-- 2) Форма вопроса -->
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">
+            Новый вопрос <span class="badge">шаг 1</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="questionText">Утверждение / вопрос</label>
+          <textarea id="questionText" class="question-input" placeholder="Например: «Слон — самое тяжёлое наземное животное»"></textarea>
+        </div>
+
+        <div class="field">
+          <label>Правильный ответ</label>
+          <div class="toggle-group" id="answerToggle">
+            <button type="button" class="toggle-option active" data-value="true">✅ Верю</button>
+            <button type="button" class="toggle-option" data-value="false">❌ Не верю</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="explanation">Пояснение (необязательно)</label>
+          <textarea id="explanation" placeholder="Покажется только при неправильном ответе"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="category">Категория (необязательно)</label>
+          <input type="text" id="category" placeholder="Например: Космос / Наука / Культура" />
+        </div>
+
+        <div class="field">
+          <label for="imageInput">Картинка к вопросу (необязательно)</label>
+          <input type="file" id="imageInput" accept="image/*" />
+          <img id="formImagePreview" class="form-preview" src="" alt="Превью" />
+        </div>
+
+        <div class="field">
+          <label for="explanationImageInput">Картинка к пояснению (необязательно)</label>
+          <input type="file" id="explanationImageInput" accept="image/*" />
+          <img id="explanationFormPreview" class="form-preview" src="" alt="Превью пояснения" />
+          <div class="hint">Покажется только при неправильном ответе.</div>
+        </div>
+
+        <div class="buttons-row">
+          <button class="primary" id="addQuestionBtn" disabled>➕ Добавить</button>
+          <button class="ghost" id="clearFormBtn" type="button" disabled>🔄 Очистить</button>
+        </div>
+      </section>
+
+      <!-- 3) Текущий набор вопросов -->
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">
+            Вопросы теста <span class="badge">шаг 2</span>
+          </div>
+          <span class="pill">Всего: <span id="questionsCount">0</span></span>
+        </div>
+
+        <div class="questions-list" id="questionsList"></div>
+
+        <div class="buttons-row" style="margin-top: 10px;">
+          <button class="primary" id="openTestBtn" type="button" disabled>🧪 Открыть тест</button>
+          <button class="danger" id="clearAllBtn" type="button" disabled>🗑 Очистить вопросы</button>
+        </div>
+
+        <div class="footer">
+          ✨
+          <a class="channel-btn" href="https://t.me/tutor_Natalya" target="_blank">Мой канал</a>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // ------------------------------
+    // Storage keys
+    // ------------------------------
+    const TESTS_LIST_KEY = "bon_tests_library_v1";
+    const TEST_PREFIX = "bon_test_"; // + id
+
+    // ------------------------------
+    // State
+    // ------------------------------
+    let tests = []; // list: {id, title, createdAt, updatedAt, count}
+    let activeTestId = null;
+    let questions = [];
+    let currentCorrectAnswer = true;
+
+    // ------------------------------
+    // DOM
+    // ------------------------------
+    const testsListEl = document.getElementById("testsList");
+    const testTitleEl = document.getElementById("testTitle");
+    const createTestBtn = document.getElementById("createTestBtn");
+    const saveTestBtn = document.getElementById("saveTestBtn");
+
+    const questionTextEl = document.getElementById("questionText");
+    const explanationEl = document.getElementById("explanation");
+    const categoryEl = document.getElementById("category");
+
+    const imageInputEl = document.getElementById("imageInput");
+    const formImagePreviewEl = document.getElementById("formImagePreview");
+
+    const explanationImageInputEl = document.getElementById("explanationImageInput");
+    const explanationFormPreviewEl = document.getElementById("explanationFormPreview");
+
+    const questionsListEl = document.getElementById("questionsList");
+    const questionsCountEl = document.getElementById("questionsCount");
+
+    const addQuestionBtn = document.getElementById("addQuestionBtn");
+    const clearFormBtn = document.getElementById("clearFormBtn");
+    const clearAllBtn = document.getElementById("clearAllBtn");
+    const openTestBtn = document.getElementById("openTestBtn");
+
+    const answerToggleEl = document.getElementById("answerToggle");
+
+    // ------------------------------
+    // Init
+    // ------------------------------
+    loadTestsList();
+    renderTestsList();
+    setActiveTest(null);
+
+    // ------------------------------
+    // Tests library actions
+    // ------------------------------
+    createTestBtn.addEventListener("click", () => {
+      const title = testTitleEl.value.trim();
+      if (!title) {
+        alert("Введите название теста.");
+        testTitleEl.focus();
+        return;
+      }
+
+      const id = Date.now().toString();
+      const now = new Date().toISOString();
+
+      const testMeta = {
+        id,
+        title,
+        createdAt: now,
+        updatedAt: now,
+        count: 0
+      };
+
+      tests.unshift(testMeta);
+      saveTestsList();
+
+      // create empty test questions
+      localStorage.setItem(TEST_PREFIX + id, JSON.stringify([]));
+
+      testTitleEl.value = "";
+      setActiveTest(id);
+      renderTestsList();
+    });
+
+    saveTestBtn.addEventListener("click", () => {
+      if (!activeTestId) return;
+
+      localStorage.setItem(TEST_PREFIX + activeTestId, JSON.stringify(questions));
+
+      // update meta
+      const meta = tests.find(t => t.id === activeTestId);
+      if (meta) {
+        meta.updatedAt = new Date().toISOString();
+        meta.count = questions.length;
+        saveTestsList();
+      }
+
+      renderTestsList();
+      alert("✅ Тест сохранён!");
+    });
+
+    function setActiveTest(testId) {
+      activeTestId = testId;
+
+      if (!testId) {
+        questions = [];
+        renderQuestions();
+        updateEnabledState(false);
+        return;
+      }
+
+      questions = loadTestQuestions(testId);
+      renderQuestions();
+      updateEnabledState(true);
+    }
+
+    function updateEnabledState(enabled) {
+      addQuestionBtn.disabled = !enabled;
+      clearFormBtn.disabled = !enabled;
+      clearAllBtn.disabled = !enabled;
+      openTestBtn.disabled = !enabled;
+      saveTestBtn.disabled = !enabled;
+
+      // input fields (optional) — оставим доступными, но кнопки блокируем
+    }
+
+    function loadTestQuestions(testId) {
+      try {
+        const data = localStorage.getItem(TEST_PREFIX + testId);
+        return data ? JSON.parse(data) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function deleteTest(testId) {
+      const meta = tests.find(t => t.id === testId);
+      const title = meta ? meta.title : "этот тест";
+
+      const ok = confirm(`Удалить тест "${title}"? Это действие нельзя отменить.`);
+      if (!ok) return;
+
+      tests = tests.filter(t => t.id !== testId);
+      saveTestsList();
+      localStorage.removeItem(TEST_PREFIX + testId);
+
+      if (activeTestId === testId) setActiveTest(null);
+
+      renderTestsList();
+    }
+
+    function selectTest(testId) {
+      setActiveTest(testId);
+      renderTestsList();
+    }
+
+    function openTest() {
+      if (!activeTestId) return;
+      // открываем test_local.html с параметром ?id=...
+      window.open(`test_local.html?id=${activeTestId}`, "_blank");
+    }
+
+    openTestBtn.addEventListener("click", openTest);
+
+    // ------------------------------
+    // Form behaviors
+    // ------------------------------
+    answerToggleEl.addEventListener("click", (event) => {
+      const btn = event.target.closest(".toggle-option");
+      if (!btn) return;
+
+      currentCorrectAnswer = btn.getAttribute("data-value") === "true";
+      answerToggleEl.querySelectorAll(".toggle-option").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+    });
+
+    imageInputEl.addEventListener("change", () => {
+      const file = imageInputEl.files[0];
+      if (!file) {
+        formImagePreviewEl.style.display = "none";
+        formImagePreviewEl.src = "";
+        return;
+      }
+      const url = URL.createObjectURL(file);
+      formImagePreviewEl.src = url;
+      formImagePreviewEl.style.display = "block";
+    });
+
+    explanationImageInputEl.addEventListener("change", () => {
+      const file = explanationImageInputEl.files[0];
+      if (!file) {
+        explanationFormPreviewEl.style.display = "none";
+        explanationFormPreviewEl.src = "";
+        return;
+      }
+      const url = URL.createObjectURL(file);
+      explanationFormPreviewEl.src = url;
+      explanationFormPreviewEl.style.display = "block";
+    });
+
+    addQuestionBtn.addEventListener("click", async (event) => {
+      event.preventDefault();
+      if (!activeTestId) return;
+
+      const text = questionTextEl.value.trim();
+      const explanation = explanationEl.value.trim();
+      const category = categoryEl.value.trim();
+
+      const qFile = imageInputEl.files[0] || null;
+      const eFile = explanationImageInputEl.files[0] || null;
+
+      if (!text) {
+        alert("Пожалуйста, напиши текст утверждения или вопроса.");
+        questionTextEl.focus();
+        return;
+      }
+
+      const baseQuestion = {
+        id: Date.now(),
+        text,
+        correct: currentCorrectAnswer,
+        explanation: explanation || null,
+        category: category || null,
+        imageData: qFile ? await readFileAsDataURL(qFile) : null,
+        explanationImageData: eFile ? await readFileAsDataURL(eFile) : null
+      };
+
+      questions.push(baseQuestion);
+
+      // авто-сохранение в текущий тест
+      localStorage.setItem(TEST_PREFIX + activeTestId, JSON.stringify(questions));
+      updateMetaCount();
+
+      renderQuestions();
+      resetForm();
+      renderTestsList();
+    });
+
+    clearFormBtn.addEventListener("click", resetForm);
+
+    function resetForm() {
+      questionTextEl.value = "";
+      explanationEl.value = "";
+      categoryEl.value = "";
+
+      imageInputEl.value = "";
+      formImagePreviewEl.src = "";
+      formImagePreviewEl.style.display = "none";
+
+      explanationImageInputEl.value = "";
+      explanationFormPreviewEl.src = "";
+      explanationFormPreviewEl.style.display = "none";
+
+      questionTextEl.focus();
+    }
+
+    clearAllBtn.addEventListener("click", () => {
+      if (!activeTestId) return;
+      if (!questions.length) return;
+
+      const ok = confirm("Удалить все вопросы этого теста?");
+      if (!ok) return;
+
+      questions = [];
+      localStorage.setItem(TEST_PREFIX + activeTestId, JSON.stringify([]));
+      updateMetaCount();
+      renderQuestions();
+      renderTestsList();
+    });
+
+    function updateMetaCount() {
+      const meta = tests.find(t => t.id === activeTestId);
+      if (meta) {
+        meta.count = questions.length;
+        meta.updatedAt = new Date().toISOString();
+        saveTestsList();
+      }
+    }
+
+    function readFileAsDataURL(file) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // ------------------------------
+    // Render tests list
+    // ------------------------------
+    function renderTestsList() {
+      testsListEl.innerHTML = "";
+
+      if (!tests.length) {
+        testsListEl.innerHTML = `
+          <div style="font-size: 13px; color:#9ca3af;">
+            Пока нет сохранённых тестов. Создай первый слева.
+          </div>`;
+        return;
+      }
+
+      tests.forEach((t) => {
+        const item = document.createElement("div");
+        item.className = "test-item";
+        if (t.id === activeTestId) item.classList.add("selected-test");
+
+        const main = document.createElement("div");
+        main.className = "test-main";
+
+        const title = document.createElement("div");
+        title.textContent = t.title;
+        title.style.fontWeight = "600";
+        main.appendChild(title);
+
+        const meta = document.createElement("div");
+        meta.className = "test-meta";
+        meta.innerHTML = `
+          <span class="pill">${t.count || 0} вопросов</span>
+          <span>обновлён: ${formatDate(t.updatedAt)}</span>
+        `;
+        main.appendChild(meta);
+
+        const actions = document.createElement("div");
+        actions.className = "test-actions";
+
+        const openBtn = document.createElement("button");
+        openBtn.className = "secondary";
+        openBtn.type = "button";
+        openBtn.textContent = "Открыть";
+        openBtn.onclick = () => selectTest(t.id);
+
+        const delBtn = document.createElement("button");
+        delBtn.className = "danger";
+        delBtn.type = "button";
+        delBtn.textContent = "Удалить";
+        delBtn.onclick = () => deleteTest(t.id);
+
+        actions.appendChild(openBtn);
+        actions.appendChild(delBtn);
+
+        item.appendChild(main);
+        item.appendChild(actions);
+        testsListEl.appendChild(item);
+      });
+    }
+
+    function formatDate(iso) {
+      if (!iso) return "-";
+      try {
+        const d = new Date(iso);
+        return d.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "2-digit" });
+      } catch {
+        return "-";
+      }
+    }
+
+    // ------------------------------
+    // Render questions list
+    // ------------------------------
+    function renderQuestions() {
+      questionsListEl.innerHTML = "";
+
+      if (!activeTestId) {
+        questionsListEl.innerHTML = `<div style="font-size: 13px; color:#9ca3af;">
+          Выбери тест слева или создай новый.
+        </div>`;
+        questionsCountEl.textContent = "0";
+        return;
+      }
+
+      if (!questions.length) {
+        questionsListEl.innerHTML = `<div style="font-size: 13px; color:#9ca3af;">
+          Пока нет вопросов. Добавь первый в средней колонке.
+        </div>`;
+      } else {
+        questions.forEach((q, index) => {
+          const item = document.createElement("div");
+          item.className = "question-item";
+
+          const main = document.createElement("div");
+          main.className = "question-main";
+
+          const textEl = document.createElement("div");
+          textEl.textContent = q.text;
+          main.appendChild(textEl);
+
+          if (q.imageData) {
+            const img = document.createElement("img");
+            img.src = q.imageData;
+            img.alt = "Картинка к вопросу";
+            img.className = "image-preview-thumb";
+            main.appendChild(img);
+          }
+
+          const meta = document.createElement("div");
+          meta.className = "question-meta";
+
+          const answerPill = document.createElement("span");
+          answerPill.className = "pill " + (q.correct ? "pill-true" : "pill-false");
+          answerPill.textContent = q.correct ? "✅ Верно" : "❌ Неверно";
+          meta.appendChild(answerPill);
+
+          if (q.category) {
+            const catPill = document.createElement("span");
+            catPill.className = "pill";
+            catPill.textContent = q.category;
+            meta.appendChild(catPill);
+          }
+
+          if (q.explanation) {
+            const explSpan = document.createElement("span");
+            explSpan.textContent = "Пояснение есть";
+            meta.appendChild(explSpan);
+          }
+
+          if (q.explanationImageData) {
+            const imgExpl = document.createElement("span");
+            imgExpl.textContent = "🖼️ картинка-пояснение";
+            meta.appendChild(imgExpl);
+          }
+
+          main.appendChild(meta);
+
+          const actions = document.createElement("div");
+          actions.className = "question-actions";
+
+          const indexEl = document.createElement("div");
+          indexEl.className = "question-index";
+          indexEl.textContent = `#${index + 1}`;
+          actions.appendChild(indexEl);
+
+          const delBtn = document.createElement("button");
+          delBtn.className = "ghost";
+          delBtn.type = "button";
+          delBtn.textContent = "Удалить";
+          delBtn.onclick = () => {
+            questions = questions.filter(x => x.id !== q.id);
+            localStorage.setItem(TEST_PREFIX + activeTestId, JSON.stringify(questions));
+            updateMetaCount();
+            renderQuestions();
+            renderTestsList();
+          };
+
+          actions.appendChild(delBtn);
+
+          item.appendChild(main);
+          item.appendChild(actions);
+
+          questionsListEl.appendChild(item);
+        });
+      }
+
+      questionsCountEl.textContent = String(questions.length);
+    }
+
+    // ------------------------------
+    // Storage for list
+    // ------------------------------
+    function loadTestsList() {
+      try {
+        const data = localStorage.getItem(TESTS_LIST_KEY);
+        tests = data ? JSON.parse(data) : [];
+      } catch {
+        tests = [];
+      }
+    }
+
+    function saveTestsList() {
+      localStorage.setItem(TESTS_LIST_KEY, JSON.stringify(tests));
+    }
+  </script>
+</body>
+
+</html>
