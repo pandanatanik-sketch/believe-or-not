@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>Конструктор игры «Верю / Не верю»</title>
+  <title>Конструктор игры «Верю / Не верю» (локальная версия)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <style>
@@ -21,9 +21,7 @@
       --shadow-soft: 0 10px 25px rgba(15, 23, 42, 0.08);
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -36,15 +34,13 @@
     }
 
     .app {
-      max-width: 1000px;
+      max-width: 1050px;
       width: 100%;
       padding: 24px 16px 32px;
     }
 
     @media (min-width: 768px) {
-      .app {
-        padding: 32px 0 40px;
-      }
+      .app { padding: 32px 0 40px; }
     }
 
     .header {
@@ -75,28 +71,18 @@
       box-shadow: 0 10px 25px rgba(59, 130, 246, 0.35);
     }
 
-    h1 {
-      margin: 0;
-      font-size: 22px;
-      letter-spacing: 0.01em;
-    }
+    h1 { margin: 0; font-size: 22px; letter-spacing: 0.01em; }
 
-    .subtitle {
-      margin: 0;
-      font-size: 14px;
-      color: var(--text-muted);
-    }
+    .subtitle { margin: 0; font-size: 14px; color: var(--text-muted); }
 
     .layout {
       display: grid;
-      grid-template-columns: 1.1fr 1.2fr;
-      gap: 20px;
+      grid-template-columns: 0.95fr 1.05fr 1.1fr;
+      gap: 18px;
     }
 
-    @media (max-width: 799px) {
-      .layout {
-        grid-template-columns: 1fr;
-      }
+    @media (max-width: 980px) {
+      .layout { grid-template-columns: 1fr; }
     }
 
     .card {
@@ -133,15 +119,9 @@
       color: #374151;
     }
 
-    label {
-      display: block;
-      font-size: 13px;
-      margin-bottom: 4px;
-      color: var(--text-muted);
-    }
+    label { display: block; font-size: 13px; margin-bottom: 4px; color: var(--text-muted); }
 
-    textarea,
-    input[type="text"] {
+    textarea, input[type="text"] {
       width: 100%;
       border-radius: var(--radius-md);
       border: 1px solid var(--border);
@@ -154,20 +134,15 @@
       background: #f9fafb;
     }
 
-    textarea:focus,
-    input[type="text"]:focus {
+    textarea:focus, input[type="text"]:focus {
       border-color: var(--accent);
       box-shadow: 0 0 0 1px rgba(75, 107, 251, 0.25);
       background: #ffffff;
     }
 
-    textarea.question-input {
-      min-height: 80px;
-    }
+    textarea.question-input { min-height: 80px; }
 
-    .field {
-      margin-bottom: 12px;
-    }
+    .field { margin-bottom: 12px; }
 
     .toggle-group {
       display: inline-flex;
@@ -199,11 +174,7 @@
       transform: translateY(-1px);
     }
 
-    .hint {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
+    .hint { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 
     .buttons-row {
       display: flex;
@@ -212,10 +183,7 @@
       margin-top: 8px;
     }
 
-    button.primary,
-    button.secondary,
-    button.ghost,
-    button.danger {
+    button.primary, button.secondary, button.ghost, button.danger {
       border-radius: 999px;
       border: none;
       cursor: pointer;
@@ -239,14 +207,8 @@
       box-shadow: 0 12px 24px rgba(79, 70, 229, 0.45);
     }
 
-    button.secondary {
-      background: #eef2ff;
-      color: #374151;
-    }
-
-    button.secondary:hover {
-      background: #e0e7ff;
-    }
+    button.secondary { background: #eef2ff; color: #374151; }
+    button.secondary:hover { background: #e0e7ff; }
 
     button.ghost {
       background: transparent;
@@ -254,69 +216,40 @@
       border: 1px dashed #d1d5db;
     }
 
-    button.ghost:hover {
-      background: #f9fafb;
-    }
+    button.ghost:hover { background: #f9fafb; }
 
-    button.danger {
-      background: #fee2e2;
-      color: #b91c1c;
-    }
+    button.danger { background: #fee2e2; color: #b91c1c; }
+    button.danger:hover { background: #fecaca; }
 
-    button.danger:hover {
-      background: #fecaca;
-    }
+    button:disabled { opacity: 0.55; cursor: default; box-shadow: none; transform: none; }
 
-    button:disabled {
-      opacity: 0.55;
-      cursor: default;
-      box-shadow: none;
-      transform: none;
-    }
-
-    .questions-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .counter-pill {
-      font-size: 12px;
-      padding: 3px 9px;
-      border-radius: 999px;
-      background: #f3f4ff;
-      color: #4b5563;
-    }
-
-    .questions-list {
+    .questions-list, .tests-list {
       display: flex;
       flex-direction: column;
       gap: 8px;
-      max-height: 390px;
+      max-height: 420px;
       overflow-y: auto;
       padding-right: 4px;
     }
 
-    .question-item {
+    .question-item, .test-item {
       border-radius: 14px;
       border: 1px solid var(--border);
-      padding: 8px 10px;
+      padding: 10px 10px;
       background: #f9fafb;
       display: grid;
       grid-template-columns: 1fr auto;
       column-gap: 10px;
-      row-gap: 4px;
+      row-gap: 6px;
       align-items: center;
     }
 
-    .question-main {
+    .question-main, .test-main {
       font-size: 14px;
       white-space: pre-wrap;
     }
 
-    .question-meta {
+    .question-meta, .test-meta {
       font-size: 11px;
       color: var(--text-muted);
       display: flex;
@@ -333,69 +266,18 @@
       border: 1px solid #e5e7eb;
     }
 
-    .pill-true {
-      background: #dcfce7;
-      border-color: #86efac;
-      color: #166534;
-    }
+    .pill-true { background: #dcfce7; border-color: #86efac; color: #166534; }
+    .pill-false { background: #fee2e2; border-color: #fecaca; color: #b91c1c; }
 
-    .pill-false {
-      background: #fee2e2;
-      border-color: #fecaca;
-      color: #b91c1c;
-    }
-
-    .question-actions {
+    .question-actions, .test-actions {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 6px;
       align-items: flex-end;
     }
 
-    .question-index {
-      font-size: 11px;
-      color: #text-muted;
-    }
+    .question-index { font-size: 11px; color: var(--text-muted); }
 
-    .export-area {
-      margin-top: 8px;
-      border-radius: 12px;
-      border: 1px dashed #d1d5db;
-      padding: 8px;
-      background: #f9fafb;
-    }
-
-    .export-textarea {
-      width: 100%;
-      min-height: 70px;
-      font-size: 12px;
-      border-radius: 8px;
-      border: none;
-      background: transparent;
-      resize: vertical;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
-        "Courier New", monospace;
-      color: #111827;
-      outline: none;
-    }
-
-    .footer {
-      margin-top: 14px;
-      font-size: 11px;
-      color: var(--text-muted);
-      text-align: right;
-    }
-
-    .footer a {
-      color: #4b6bfb;
-      text-decoration: none;
-    }
-
-    .footer a:hover {
-      text-decoration: underline;
-    }
-
-    /* мини-превью картинки в списке вопросов */
     .image-preview-thumb {
       margin-top: 6px;
       max-width: 70px;
@@ -404,6 +286,56 @@
       object-fit: cover;
       border: 1px solid #e5e7eb;
     }
+
+    .form-preview {
+      margin-top: 8px;
+      display: none;
+      max-width: 100%;
+      max-height: 220px;
+      border-radius: 14px;
+      object-fit: contain;
+      box-shadow: 0 8px 16px rgba(15, 23, 42, 0.12);
+      border: 1px solid #eef0f8;
+      background: #fff;
+    }
+
+    .selected-test {
+      border: 1px solid rgba(75, 107, 251, 0.35);
+      background: #f3f4ff;
+    }
+
+    /* ✨ footer + кнопка канала */
+    .footer {
+      margin-top: 14px;
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: right;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .channel-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #4b6bfb;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 12px;
+      border: 1px solid #e0e7ff;
+      transition: transform 0.05s, box-shadow 0.1s, background-color 0.1s;
+    }
+
+    .channel-btn:hover {
+      background: #e0e7ff;
+      box-shadow: 0 8px 18px rgba(75, 107, 251, 0.22);
+      transform: translateY(-1px);
+    }
   </style>
 </head>
 
@@ -411,188 +343,322 @@
   <div class="app">
     <header class="header">
       <div class="title-row">
-        <div class="logo-circle">B?</div>
+        <div class="logo-circle">✅❌</div>
         <div>
           <h1>Конструктор игры «Верю / Не верю»</h1>
-          <p class="subtitle">
-            Создавай свои карточки с утверждениями, правильным ответом, пояснением и картинкой.
-          </p>
+          <p class="subtitle">Локальная библиотека тестов — всё хранится в этом браузере.</p>
         </div>
       </div>
     </header>
 
     <main class="layout">
-      <!-- Левая колонка: форма создания вопроса -->
+      <!-- 1) Библиотека тестов -->
       <section class="card">
         <div class="card-header">
           <div class="card-title">
-            Новый вопрос
-            <span class="badge">шаг 1</span>
+            Мои тесты <span class="badge">шаг 0</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="testTitle">Название нового теста</label>
+          <input type="text" id="testTitle" placeholder="Например: Животные / История / Новый год" />
+          <div class="hint">Нажми «Создать», чтобы начать добавлять вопросы.</div>
+        </div>
+
+        <div class="buttons-row">
+          <button class="primary" id="createTestBtn">➕ Создать</button>
+          <button class="secondary" id="saveTestBtn" disabled>💾 Сохранить</button>
+        </div>
+
+        <div style="height:10px;"></div>
+
+        <div class="tests-list" id="testsList"></div>
+      </section>
+
+      <!-- 2) Форма вопроса -->
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">
+            Новый вопрос <span class="badge">шаг 1</span>
           </div>
         </div>
 
         <div class="field">
           <label for="questionText">Утверждение / вопрос</label>
-          <textarea id="questionText" class="question-input"
-            placeholder="Например: «Слон — это самое тяжёлое наземное животное»"></textarea>
-          <div class="hint">Формулировка, которую увидят игроки.</div>
+          <textarea id="questionText" class="question-input" placeholder="Например: «Слон — самое тяжёлое наземное животное»"></textarea>
         </div>
 
         <div class="field">
           <label>Правильный ответ</label>
           <div class="toggle-group" id="answerToggle">
-            <button type="button" class="toggle-option active" data-value="true">
-              ✅ Верю (правда)
-            </button>
-            <button type="button" class="toggle-option" data-value="false">
-              ❌ Не верю (ложь)
-            </button>
-          </div>
-          <div class="hint">
-            На что должен ответить ведущий: утверждение верное или нет.
+            <button type="button" class="toggle-option active" data-value="true">✅ Верю</button>
+            <button type="button" class="toggle-option" data-value="false">❌ Не верю</button>
           </div>
         </div>
 
         <div class="field">
           <label for="explanation">Пояснение (необязательно)</label>
-          <textarea id="explanation" placeholder="Коротко поясни, почему это правда или ложь."></textarea>
+          <textarea id="explanation" placeholder="Покажется только при неправильном ответе"></textarea>
         </div>
 
         <div class="field">
           <label for="category">Категория (необязательно)</label>
-          <input type="text" id="category" placeholder="Например: Животные / Космос / История" />
+          <input type="text" id="category" placeholder="Например: Космос / Наука / Культура" />
         </div>
 
         <div class="field">
-          <label for="imageInput">Картинка (необязательно)</label>
+          <label for="imageInput">Картинка к вопросу (необязательно)</label>
           <input type="file" id="imageInput" accept="image/*" />
-          <div class="hint">Картинка сохранится вместе с вопросом и будет показана в тесте.</div>
+          <img id="formImagePreview" class="form-preview" src="" alt="Превью" />
+        </div>
+
+        <div class="field">
+          <label for="explanationImageInput">Картинка к пояснению (необязательно)</label>
+          <input type="file" id="explanationImageInput" accept="image/*" />
+          <img id="explanationFormPreview" class="form-preview" src="" alt="Превью пояснения" />
+          <div class="hint">Покажется только при неправильном ответе.</div>
         </div>
 
         <div class="buttons-row">
-          <button class="primary" id="addQuestionBtn">
-            ➕ Добавить в набор
-          </button>
-          <button class="ghost" id="clearFormBtn" type="button">
-            🔄 Очистить поля
-          </button>
+          <button class="primary" id="addQuestionBtn" disabled>➕ Добавить</button>
+          <button class="ghost" id="clearFormBtn" type="button" disabled>🔄 Очистить</button>
         </div>
       </section>
 
-      <!-- Правая колонка: список вопросов и экспорт -->
+      <!-- 3) Текущий набор вопросов -->
       <section class="card">
         <div class="card-header">
           <div class="card-title">
-            Набор вопросов
-            <span class="badge">шаг 2</span>
+            Вопросы теста <span class="badge">шаг 2</span>
           </div>
-          <span class="counter-pill">
-            Всего: <span id="questionsCount">0</span>
-          </span>
+          <span class="pill">Всего: <span id="questionsCount">0</span></span>
         </div>
 
-        <div class="questions-list" id="questionsList">
-          <!-- Вопросы появятся здесь -->
-        </div>
+        <div class="questions-list" id="questionsList"></div>
 
         <div class="buttons-row" style="margin-top: 10px;">
-          <!-- Открытие теста в отдельном окне -->
-          <button class="primary" type="button" onclick="window.open('test.html', '_blank')">
-            🧪 Открыть тест
-          </button>
-          <button class="secondary" id="exportBtn" type="button">
-            ⬇️ Экспортировать в JSON
-          </button>
-          <button class="danger" id="clearAllBtn" type="button">
-            🗑 Очистить всё
-          </button>
-        </div>
-
-        <div class="export-area" id="exportArea" style="display: none;">
-          <label style="font-size: 12px; margin-bottom: 4px; display: block;">
-            Скопируй JSON или скачай файл:
-          </label>
-          <textarea class="export-textarea" id="exportTextarea" readonly></textarea>
-          <div class="buttons-row" style="margin-top: 6px;">
-            <button class="secondary" id="copyJsonBtn" type="button">
-              📋 Скопировать JSON
-            </button>
-            <button class="secondary" id="downloadJsonBtn" type="button">
-              💾 Скачать JSON
-            </button>
-            <button class="ghost" id="hideExportBtn" type="button">
-              🙈 Скрыть
-            </button>
-          </div>
+          <button class="primary" id="openTestBtn" type="button" disabled>🧪 Открыть тест</button>
+          <button class="danger" id="clearAllBtn" type="button" disabled>🗑 Очистить вопросы</button>
         </div>
 
         <div class="footer">
-          Сделано с нуля ✨
+          ✨
+          <a class="channel-btn" href="https://t.me/tutor_Natalya" target="_blank">Мой канал</a>
         </div>
       </section>
     </main>
   </div>
 
   <script>
-    // -----------------------------
-    // Состояние
-    // -----------------------------
-    let questions = [];
-    let currentCorrectAnswer = true; // true = "верю", false = "не верю"
-    const STORAGE_KEY = "believe_or_not_questions_v1";
+    // ------------------------------
+    // Storage keys
+    // ------------------------------
+    const TESTS_LIST_KEY = "bon_tests_library_v1";
+    const TEST_PREFIX = "bon_test_"; // + id
 
-    // -----------------------------
-    // Элементы DOM
-    // -----------------------------
+    // ------------------------------
+    // State
+    // ------------------------------
+    let tests = []; // list: {id, title, createdAt, updatedAt, count}
+    let activeTestId = null;
+    let questions = [];
+    let currentCorrectAnswer = true;
+
+    // ------------------------------
+    // DOM
+    // ------------------------------
+    const testsListEl = document.getElementById("testsList");
+    const testTitleEl = document.getElementById("testTitle");
+    const createTestBtn = document.getElementById("createTestBtn");
+    const saveTestBtn = document.getElementById("saveTestBtn");
+
     const questionTextEl = document.getElementById("questionText");
     const explanationEl = document.getElementById("explanation");
     const categoryEl = document.getElementById("category");
+
     const imageInputEl = document.getElementById("imageInput");
+    const formImagePreviewEl = document.getElementById("formImagePreview");
+
+    const explanationImageInputEl = document.getElementById("explanationImageInput");
+    const explanationFormPreviewEl = document.getElementById("explanationFormPreview");
 
     const questionsListEl = document.getElementById("questionsList");
     const questionsCountEl = document.getElementById("questionsCount");
+
     const addQuestionBtn = document.getElementById("addQuestionBtn");
     const clearFormBtn = document.getElementById("clearFormBtn");
     const clearAllBtn = document.getElementById("clearAllBtn");
-    const exportBtn = document.getElementById("exportBtn");
-    const exportAreaEl = document.getElementById("exportArea");
-    const exportTextareaEl = document.getElementById("exportTextarea");
-    const downloadJsonBtn = document.getElementById("downloadJsonBtn");
-    const hideExportBtn = document.getElementById("hideExportBtn");
-    const copyJsonBtn = document.getElementById("copyJsonBtn");
+    const openTestBtn = document.getElementById("openTestBtn");
+
     const answerToggleEl = document.getElementById("answerToggle");
 
-    // -----------------------------
-    // Инициализация
-    // -----------------------------
-    loadFromStorage();
-    renderQuestions();
+    // ------------------------------
+    // Init
+    // ------------------------------
+    loadTestsList();
+    renderTestsList();
+    setActiveTest(null);
 
-    // -----------------------------
-    // Переключатель "верю / не верю"
-    // -----------------------------
+    // ------------------------------
+    // Tests library actions
+    // ------------------------------
+    createTestBtn.addEventListener("click", () => {
+      const title = testTitleEl.value.trim();
+      if (!title) {
+        alert("Введите название теста.");
+        testTitleEl.focus();
+        return;
+      }
+
+      const id = Date.now().toString();
+      const now = new Date().toISOString();
+
+      const testMeta = {
+        id,
+        title,
+        createdAt: now,
+        updatedAt: now,
+        count: 0
+      };
+
+      tests.unshift(testMeta);
+      saveTestsList();
+
+      // create empty test questions
+      localStorage.setItem(TEST_PREFIX + id, JSON.stringify([]));
+
+      testTitleEl.value = "";
+      setActiveTest(id);
+      renderTestsList();
+    });
+
+    saveTestBtn.addEventListener("click", () => {
+      if (!activeTestId) return;
+
+      localStorage.setItem(TEST_PREFIX + activeTestId, JSON.stringify(questions));
+
+      // update meta
+      const meta = tests.find(t => t.id === activeTestId);
+      if (meta) {
+        meta.updatedAt = new Date().toISOString();
+        meta.count = questions.length;
+        saveTestsList();
+      }
+
+      renderTestsList();
+      alert("✅ Тест сохранён!");
+    });
+
+    function setActiveTest(testId) {
+      activeTestId = testId;
+
+      if (!testId) {
+        questions = [];
+        renderQuestions();
+        updateEnabledState(false);
+        return;
+      }
+
+      questions = loadTestQuestions(testId);
+      renderQuestions();
+      updateEnabledState(true);
+    }
+
+    function updateEnabledState(enabled) {
+      addQuestionBtn.disabled = !enabled;
+      clearFormBtn.disabled = !enabled;
+      clearAllBtn.disabled = !enabled;
+      openTestBtn.disabled = !enabled;
+      saveTestBtn.disabled = !enabled;
+
+      // input fields (optional) — оставим доступными, но кнопки блокируем
+    }
+
+    function loadTestQuestions(testId) {
+      try {
+        const data = localStorage.getItem(TEST_PREFIX + testId);
+        return data ? JSON.parse(data) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function deleteTest(testId) {
+      const meta = tests.find(t => t.id === testId);
+      const title = meta ? meta.title : "этот тест";
+
+      const ok = confirm(`Удалить тест "${title}"? Это действие нельзя отменить.`);
+      if (!ok) return;
+
+      tests = tests.filter(t => t.id !== testId);
+      saveTestsList();
+      localStorage.removeItem(TEST_PREFIX + testId);
+
+      if (activeTestId === testId) setActiveTest(null);
+
+      renderTestsList();
+    }
+
+    function selectTest(testId) {
+      setActiveTest(testId);
+      renderTestsList();
+    }
+
+    function openTest() {
+      if (!activeTestId) return;
+      // открываем test_local.html с параметром ?id=...
+      window.open(`test.html?id=${activeTestId}`, "_blank");
+    }
+
+    openTestBtn.addEventListener("click", openTest);
+
+    // ------------------------------
+    // Form behaviors
+    // ------------------------------
     answerToggleEl.addEventListener("click", (event) => {
       const btn = event.target.closest(".toggle-option");
       if (!btn) return;
 
-      const value = btn.getAttribute("data-value");
-      currentCorrectAnswer = value === "true";
-
-      const allOptions = answerToggleEl.querySelectorAll(".toggle-option");
-      allOptions.forEach((opt) => opt.classList.remove("active"));
+      currentCorrectAnswer = btn.getAttribute("data-value") === "true";
+      answerToggleEl.querySelectorAll(".toggle-option").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
     });
 
-    // -----------------------------
-    // Добавление вопроса (с картинкой)
-    // -----------------------------
-    addQuestionBtn.addEventListener("click", (event) => {
+    imageInputEl.addEventListener("change", () => {
+      const file = imageInputEl.files[0];
+      if (!file) {
+        formImagePreviewEl.style.display = "none";
+        formImagePreviewEl.src = "";
+        return;
+      }
+      const url = URL.createObjectURL(file);
+      formImagePreviewEl.src = url;
+      formImagePreviewEl.style.display = "block";
+    });
+
+    explanationImageInputEl.addEventListener("change", () => {
+      const file = explanationImageInputEl.files[0];
+      if (!file) {
+        explanationFormPreviewEl.style.display = "none";
+        explanationFormPreviewEl.src = "";
+        return;
+      }
+      const url = URL.createObjectURL(file);
+      explanationFormPreviewEl.src = url;
+      explanationFormPreviewEl.style.display = "block";
+    });
+
+    addQuestionBtn.addEventListener("click", async (event) => {
       event.preventDefault();
+      if (!activeTestId) return;
 
       const text = questionTextEl.value.trim();
       const explanation = explanationEl.value.trim();
       const category = categoryEl.value.trim();
-      const file = imageInputEl.files[0] || null;
+
+      const qFile = imageInputEl.files[0] || null;
+      const eFile = explanationImageInputEl.files[0] || null;
 
       if (!text) {
         alert("Пожалуйста, напиши текст утверждения или вопроса.");
@@ -606,52 +672,157 @@
         correct: currentCorrectAnswer,
         explanation: explanation || null,
         category: category || null,
-        imageData: null,
+        imageData: qFile ? await readFileAsDataURL(qFile) : null,
+        explanationImageData: eFile ? await readFileAsDataURL(eFile) : null
       };
 
-      if (!file) {
-        questions.push(baseQuestion);
-        saveToStorage();
-        renderQuestions();
-        resetForm();
-        return;
-      }
+      questions.push(baseQuestion);
 
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        baseQuestion.imageData = e.target.result;
-        questions.push(baseQuestion);
-        saveToStorage();
-        renderQuestions();
-        resetForm();
-      };
-      reader.readAsDataURL(file);
-    });
+      // авто-сохранение в текущий тест
+      localStorage.setItem(TEST_PREFIX + activeTestId, JSON.stringify(questions));
+      updateMetaCount();
 
-    // -----------------------------
-    // Очистка формы
-    // -----------------------------
-    clearFormBtn.addEventListener("click", () => {
+      renderQuestions();
       resetForm();
+      renderTestsList();
     });
+
+    clearFormBtn.addEventListener("click", resetForm);
 
     function resetForm() {
       questionTextEl.value = "";
       explanationEl.value = "";
       categoryEl.value = "";
+
       imageInputEl.value = "";
+      formImagePreviewEl.src = "";
+      formImagePreviewEl.style.display = "none";
+
+      explanationImageInputEl.value = "";
+      explanationFormPreviewEl.src = "";
+      explanationFormPreviewEl.style.display = "none";
+
       questionTextEl.focus();
     }
 
-    // -----------------------------
-    // Отрисовка списка вопросов
-    // -----------------------------
+    clearAllBtn.addEventListener("click", () => {
+      if (!activeTestId) return;
+      if (!questions.length) return;
+
+      const ok = confirm("Удалить все вопросы этого теста?");
+      if (!ok) return;
+
+      questions = [];
+      localStorage.setItem(TEST_PREFIX + activeTestId, JSON.stringify([]));
+      updateMetaCount();
+      renderQuestions();
+      renderTestsList();
+    });
+
+    function updateMetaCount() {
+      const meta = tests.find(t => t.id === activeTestId);
+      if (meta) {
+        meta.count = questions.length;
+        meta.updatedAt = new Date().toISOString();
+        saveTestsList();
+      }
+    }
+
+    function readFileAsDataURL(file) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // ------------------------------
+    // Render tests list
+    // ------------------------------
+    function renderTestsList() {
+      testsListEl.innerHTML = "";
+
+      if (!tests.length) {
+        testsListEl.innerHTML = `
+          <div style="font-size: 13px; color:#9ca3af;">
+            Пока нет сохранённых тестов. Создай первый слева.
+          </div>`;
+        return;
+      }
+
+      tests.forEach((t) => {
+        const item = document.createElement("div");
+        item.className = "test-item";
+        if (t.id === activeTestId) item.classList.add("selected-test");
+
+        const main = document.createElement("div");
+        main.className = "test-main";
+
+        const title = document.createElement("div");
+        title.textContent = t.title;
+        title.style.fontWeight = "600";
+        main.appendChild(title);
+
+        const meta = document.createElement("div");
+        meta.className = "test-meta";
+        meta.innerHTML = `
+          <span class="pill">${t.count || 0} вопросов</span>
+          <span>обновлён: ${formatDate(t.updatedAt)}</span>
+        `;
+        main.appendChild(meta);
+
+        const actions = document.createElement("div");
+        actions.className = "test-actions";
+
+        const openBtn = document.createElement("button");
+        openBtn.className = "secondary";
+        openBtn.type = "button";
+        openBtn.textContent = "Открыть";
+        openBtn.onclick = () => selectTest(t.id);
+
+        const delBtn = document.createElement("button");
+        delBtn.className = "danger";
+        delBtn.type = "button";
+        delBtn.textContent = "Удалить";
+        delBtn.onclick = () => deleteTest(t.id);
+
+        actions.appendChild(openBtn);
+        actions.appendChild(delBtn);
+
+        item.appendChild(main);
+        item.appendChild(actions);
+        testsListEl.appendChild(item);
+      });
+    }
+
+    function formatDate(iso) {
+      if (!iso) return "-";
+      try {
+        const d = new Date(iso);
+        return d.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "2-digit" });
+      } catch {
+        return "-";
+      }
+    }
+
+    // ------------------------------
+    // Render questions list
+    // ------------------------------
     function renderQuestions() {
       questionsListEl.innerHTML = "";
 
-      if (questions.length === 0) {
-        questionsListEl.innerHTML =
-          '<div style="font-size: 13px; color: #9ca3af;">Пока нет ни одного вопроса. Добавь первый в левой колонке.</div>';
+      if (!activeTestId) {
+        questionsListEl.innerHTML = `<div style="font-size: 13px; color:#9ca3af;">
+          Выбери тест слева или создай новый.
+        </div>`;
+        questionsCountEl.textContent = "0";
+        return;
+      }
+
+      if (!questions.length) {
+        questionsListEl.innerHTML = `<div style="font-size: 13px; color:#9ca3af;">
+          Пока нет вопросов. Добавь первый в средней колонке.
+        </div>`;
       } else {
         questions.forEach((q, index) => {
           const item = document.createElement("div");
@@ -676,8 +847,7 @@
           meta.className = "question-meta";
 
           const answerPill = document.createElement("span");
-          answerPill.className =
-            "pill " + (q.correct ? "pill-true" : "pill-false");
+          answerPill.className = "pill " + (q.correct ? "pill-true" : "pill-false");
           answerPill.textContent = q.correct ? "✅ Верно" : "❌ Неверно";
           meta.appendChild(answerPill);
 
@@ -694,6 +864,12 @@
             meta.appendChild(explSpan);
           }
 
+          if (q.explanationImageData) {
+            const imgExpl = document.createElement("span");
+            imgExpl.textContent = "🖼️ картинка-пояснение";
+            meta.appendChild(imgExpl);
+          }
+
           main.appendChild(meta);
 
           const actions = document.createElement("div");
@@ -704,15 +880,19 @@
           indexEl.textContent = `#${index + 1}`;
           actions.appendChild(indexEl);
 
-          const deleteBtn = document.createElement("button");
-          deleteBtn.className = "ghost";
-          deleteBtn.type = "button";
-          deleteBtn.textContent = "Удалить";
-          deleteBtn.addEventListener("click", () => {
-            deleteQuestion(q.id);
-          });
+          const delBtn = document.createElement("button");
+          delBtn.className = "ghost";
+          delBtn.type = "button";
+          delBtn.textContent = "Удалить";
+          delBtn.onclick = () => {
+            questions = questions.filter(x => x.id !== q.id);
+            localStorage.setItem(TEST_PREFIX + activeTestId, JSON.stringify(questions));
+            updateMetaCount();
+            renderQuestions();
+            renderTestsList();
+          };
 
-          actions.appendChild(deleteBtn);
+          actions.appendChild(delBtn);
 
           item.appendChild(main);
           item.appendChild(actions);
@@ -724,135 +904,21 @@
       questionsCountEl.textContent = String(questions.length);
     }
 
-    function deleteQuestion(id) {
-      questions = questions.filter((q) => q.id !== id);
-      saveToStorage();
-      renderQuestions();
-    }
-
-    // -----------------------------
-    // Хранение в LocalStorage
-    // -----------------------------
-    function saveToStorage() {
+    // ------------------------------
+    // Storage for list
+    // ------------------------------
+    function loadTestsList() {
       try {
-        const data = JSON.stringify(questions);
-        localStorage.setItem(STORAGE_KEY, data);
-      } catch (e) {
-        console.warn("Не удалось сохранить данные в LocalStorage:", e);
+        const data = localStorage.getItem(TESTS_LIST_KEY);
+        tests = data ? JSON.parse(data) : [];
+      } catch {
+        tests = [];
       }
     }
 
-    function loadFromStorage() {
-      try {
-        const data = localStorage.getItem(STORAGE_KEY);
-        if (data) {
-          questions = JSON.parse(data);
-        }
-      } catch (e) {
-        console.warn("Не удалось загрузить данные из LocalStorage:", e);
-        questions = [];
-      }
+    function saveTestsList() {
+      localStorage.setItem(TESTS_LIST_KEY, JSON.stringify(tests));
     }
-
-    // -----------------------------
-    // Экспорт в JSON
-    // -----------------------------
-    exportBtn.addEventListener("click", () => {
-      if (questions.length === 0) {
-        alert("Нечего экспортировать — список вопросов пуст.");
-        return;
-      }
-
-      const exportData = {
-        type: "believe_or_not",
-        createdAt: new Date().toISOString(),
-        items: questions,
-      };
-
-      const json = JSON.stringify(exportData, null, 2);
-      exportTextareaEl.value = json;
-      exportAreaEl.style.display = "block";
-    });
-
-    hideExportBtn.addEventListener("click", () => {
-      exportAreaEl.style.display = "none";
-    });
-
-    downloadJsonBtn.addEventListener("click", () => {
-      const content = exportTextareaEl.value.trim();
-      if (!content) return;
-
-      const blob = new Blob([content], { type: "application/json;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-
-      const link = document.createElement("a");
-      const date = new Date().toISOString().slice(0, 10);
-      link.href = url;
-      link.download = `believe_or_not_${date}.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      URL.revokeObjectURL(url);
-    });
-
-    // -----------------------------
-    // Копировать JSON в буфер
-    // -----------------------------
-    copyJsonBtn.addEventListener("click", () => {
-      const text = exportTextareaEl.value.trim();
-      if (!text) {
-        alert("Нет данных для копирования.");
-        return;
-      }
-
-      // Современный способ
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text)
-          .then(() => showCopiedState())
-          .catch(() => fallbackCopy(text));
-      } else {
-        fallbackCopy(text);
-      }
-    });
-
-    function fallbackCopy(text) {
-      try {
-        const temp = document.createElement("textarea");
-        temp.value = text;
-        document.body.appendChild(temp);
-        temp.select();
-        document.execCommand("copy");
-        document.body.removeChild(temp);
-        showCopiedState();
-      } catch (e) {
-        alert("Не получилось скопировать 😢");
-      }
-    }
-
-    function showCopiedState() {
-      const original = copyJsonBtn.textContent;
-      copyJsonBtn.textContent = "✔ Скопировано!";
-      setTimeout(() => {
-        copyJsonBtn.textContent = original;
-      }, 1500);
-    }
-
-    // -----------------------------
-    // Очистить всё
-    // -----------------------------
-    clearAllBtn.addEventListener("click", () => {
-      if (!questions.length) return;
-      const ok = confirm(
-        "Точно удалить все вопросы? Отменить это действие будет нельзя."
-      );
-      if (!ok) return;
-
-      questions = [];
-      saveToStorage();
-      renderQuestions();
-      exportAreaEl.style.display = "none";
-    });
   </script>
 </body>
 
