@@ -1,0 +1,158 @@
+{
+  "id": "1766578696161",
+  "name": "Номера",
+  "createdAt": "2025-12-24T12:18:16.161Z",
+  "updatedAt": "2025-12-24T17:35:05.579Z",
+  "settings": {
+    "shuffleEnabled": true
+  },
+  "items": [
+    {
+      "id": 1766579529272,
+      "type": "open_answer",
+      "text": "1",
+      "category": null,
+      "explanation": "acasc",
+      "imageUrl": null,
+      "explanationImageUrl": null,
+      "correctText": "d",
+      "checkMode": "exact"
+    },
+    {
+      "id": 1766579554046,
+      "type": "multiple_choice",
+      "text": "acc",
+      "category": null,
+      "explanation": null,
+      "imageUrl": null,
+      "explanationImageUrl": null,
+      "options": [
+        "Вариант 1",
+        "Вариант 2",
+        "d vz",
+        "dvzsv"
+      ],
+      "correctIndex": 0
+    },
+    {
+      "id": 1766595942624,
+      "type": "multiple_choice",
+      "text": "с ыя ыС",
+      "category": null,
+      "explanation": "ысыс",
+      "imageUrl": null,
+      "explanationImageUrl": null,
+      "options": [
+        "с ычс",
+        "вкмвм"
+      ],
+      "correctIndex": 0
+    },
+    {
+      "id": 1766595950795,
+      "type": "multiple_choice",
+      "text": "acc (копия)",
+      "category": null,
+      "explanation": null,
+      "imageUrl": null,
+      "explanationImageUrl": null,
+      "options": [
+        "Вариант 1",
+        "Вариант 2",
+        "d vz",
+        "dvzsv"
+      ],
+      "correctIndex": 0
+    },
+    {
+      "id": 1766595951281,
+      "type": "multiple_choice",
+      "text": "acc (копия)",
+      "category": null,
+      "explanation": null,
+      "imageUrl": null,
+      "explanationImageUrl": null,
+      "options": [
+        "Вариант 1",
+        "Вариант 2",
+        "d vz",
+        "dvzsv"
+      ],
+      "correctIndex": 0
+    },
+    {
+      "id": 1766595951513,
+      "type": "multiple_choice",
+      "text": "acc (копия)",
+      "category": null,
+      "explanation": null,
+      "imageUrl": null,
+      "explanationImageUrl": null,
+      "options": [
+        "Вариант 1",
+        "Вариант 2",
+        "d vz",
+        "dvzsv"
+      ],
+      "correctIndex": 0
+    },
+    {
+      "id": 1766595951705,
+      "type": "multiple_choice",
+      "text": "acc (копия)",
+      "category": null,
+      "explanation": null,
+      "imageUrl": null,
+      "explanationImageUrl": null,
+      "options": [
+        "Вариант 1",
+        "Вариант 2",
+        "d vz",
+        "dvzsv"
+      ],
+      "correctIndex": 0
+    },
+    {
+      "id": 1766595951897,
+      "type": "multiple_choice",
+      "text": "acc (копия)",
+      "category": null,
+      "explanation": null,
+      "imageUrl": null,
+      "explanationImageUrl": null,
+      "options": [
+        "Вариант 1",
+        "Вариант 2",
+        "d vz",
+        "dvzsv"
+      ],
+      "correctIndex": 0
+    },
+    {
+      "id": 1766595952081,
+      "type": "multiple_choice",
+      "text": "acc (копия)",
+      "category": null,
+      "explanation": null,
+      "imageUrl": null,
+      "explanationImageUrl": null,
+      "options": [
+        "Вариант 1",
+        "Вариант 2",
+        "d vz",
+        "dvzsv"
+      ],
+      "correctIndex": 0
+    },
+    {
+      "id": 1766597698535,
+      "type": "true_false",
+      "text": "аа",
+      "category": null,
+      "explanation": null,
+      "imageUrl": null,
+      "explanationImageUrl": null,
+      "correct": true
+    }
+  ]
+}
