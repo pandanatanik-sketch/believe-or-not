@@ -1,32 +1,8 @@
-// ===== js/test.js =====
+// ===== test.js =====
 
 // Где хранятся тесты (созданы в index)
 const TESTS_KEY = "believe_or_not_tests_v2";
 const ACTIVE_TEST_ID_KEY = "believe_or_not_active_test_id_v2";
-function getJsonUrlFromQuery() {
-  const params = new URLSearchParams(window.location.search);
-  const json = params.get("json");
-  return json ? json.trim() : null;
-}
-
-async function loadTestFromJsonUrl(jsonPath) {
-  // jsonPath будет вроде "tests/mytest.json"
-  const res = await fetch(jsonPath, { cache: "no-store" });
-  if (!res.ok) throw new Error("Не удалось загрузить JSON: " + res.status);
-
-  const data = await res.json();
-
-  // поддержка двух форматов:
-  // 1) файл = { name, items, settings }
-  // 2) файл = { type, createdAt, items } + name отдельно отсутствует
-  return {
-    id: "external_json_" + Date.now(),
-    name: data.name || data.testName || "Тест",
-    items: data.items || [],
-    settings: data.settings || { shuffleEnabled: false }
-  };
-}
-
 
 // --------------------
 // DOM
@@ -73,8 +49,8 @@ const pngRenderEl = document.getElementById("pngRender");
 // --------------------
 // State
 // --------------------
-let testData = null;     // активный тест
-let questions = [];      // вопросы для прохождения (учитывает режим "только ошибки")
+let testData = null;        // активный тест
+let questions = [];         // вопросы для прохождения (учитывает режим "только ошибки")
 let originalQuestions = []; // полный список (порядок преподавателя)
 let currentIndex = 0;
 let score = 0;
@@ -115,11 +91,6 @@ function shuffleArray(arr) {
   return a;
 }
 
-// ✅ Ждём следующий кадр (чтобы DOM успел отрисоваться)
-function nextFrame() {
-  return new Promise((resolve) => requestAnimationFrame(() => resolve()));
-}
-
 // --------------------
 // Load test from storage
 // --------------------
@@ -137,31 +108,126 @@ function loadActiveTest() {
   }
 }
 
-async function init() {
-  const jsonPath = getJsonUrlFromQuery();
+// --------------------
+// Load test from URL (?json=...)
+// --------------------
+function getJsonParam() {
+  try {
+    const p = new URLSearchParams(window.location.search).get("json");
+    return p ? p.trim() : "";
+  } catch {
+    return "";
+  }
+}
 
-  if (jsonPath) {
-    try {
-      testData = await loadTestFromJsonUrl(jsonPath);
-    } catch (e) {
-      cardEl.innerHTML = `
-        <div style="font-size:18px;font-weight:900;margin-bottom:6px;">Ошибка загрузки теста</div>
-        <div style="font-size:13px;color:#6b7280;line-height:1.4;">
-          Не удалось загрузить тест по ссылке:<br>
-          <b>${jsonPath}</b><br><br>
-          ${e}
-        </div>
-        <div style="margin-top:12px;">
-          <a class="channel-btn" href="https://t.me/tutor_Natalya" target="_blank">✨ Мой канал</a>
-        </div>
-      `;
-      return;
-    }
-  } else {
-    // обычный режим: тест из localStorage
-    testData = loadActiveTest();
+async function loadTestFromUrlParam() {
+  const param = getJsonParam();
+  if (!param) return null;
+
+  // относительный путь (tests/xxx.json) или абсолютная ссылка
+  const url = /^https?:\/\//i.test(param) ? param : encodeURI(param);
+
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) {
+    throw new Error(`Не удалось загрузить JSON (${res.status})`);
   }
 
+  const data = await res.json();
+
+  // Нормализация на случай старых форматов
+  if (Array.isArray(data)) {
+    return { id: "url", name: "Тест", settings: { shuffleEnabled: false }, items: data };
+  }
+  if (data && typeof data === "object") {
+    if (Array.isArray(data.items)) return data;
+    if (Array.isArray(data.questions)) {
+      return { ...data, items: data.questions };
+    }
+  }
+
+  throw new Error("JSON имеет неизвестный формат");
+}
+
+// --------------------
+// Persistence for wrong-only mode
+// --------------------
+function saveLastWrongQuestionIds(ids) {
+  try {
+    localStorage.setItem("believe_or_not_last_wrong_ids_v2", JSON.stringify(ids || []));
+  } catch { }
+}
+
+function getLastWrongQuestionIds() {
+  try {
+    return JSON.parse(localStorage.getItem("believe_or_not_last_wrong_ids_v2") || "[]");
+  } catch {
+    return [];
+  }
+}
+
+// --------------------
+// Init
+// --------------------
+async function init() {
+  try {
+    testData = await loadTestFromUrlParam();
+    if (!testData) testData = loadActiveTest();
+  } catch (e) {
+    console.warn(e);
+    cardEl.innerHTML = `
+      <div style="font-size:18px;font-weight:900;margin-bottom:6px;">Не удалось открыть тест</div>
+      <div style="font-size:13px;color:#6b7280;line-height:1.4;">
+        Проверь ссылку <b>?json=...</b> и что файл доступен в репозитории.<br>
+        Текст ошибки: <b>${safeText(e?.message || e)}</b>
+      </div>
+      <div style="margin-top:12px;">
+        <a class="channel-btn" href="https://t.me/tutor_Natalya" target="_blank" rel="noopener">✨ Мой канал</a>
+      </div>
+    `;
+    return;
+  }
+
+  if (!testData || !testData.items || !testData.items.length) {
+    cardEl.innerHTML = `
+      <div style="font-size:18px;font-weight:900;margin-bottom:6px;">Вопросы не найдены</div>
+      <div style="font-size:13px;color:#6b7280;line-height:1.4;">
+        Похоже, в выбранном тесте нет вопросов.<br>
+        Открой конструктор (index.html), добавь вопросы — и затем снова зайди сюда.
+      </div>
+      <div style="margin-top:12px;">
+        <a class="channel-btn" href="https://t.me/tutor_Natalya" target="_blank" rel="noopener">✨ Мой канал</a>
+      </div>
+    `;
+    return;
+  }
+
+  const testName = testData.name || "Тест";
+  testTitleStart.textContent = testName;
+  testTitleTop.textContent = testName;
+  testTitleResult.textContent = "Результат — " + testName;
+
+  originalQuestions = testData.items.slice();
+
+  // Подзаголовок на стартовом экране
+  const shuffleEnabled = !!testData.settings?.shuffleEnabled;
+  startSubtitle.textContent = shuffleEnabled
+    ? "Вопросы будут перемешаны перед началом теста."
+    : "";
+
+  startBtn.addEventListener("click", startTest);
+
+  restartBtn.addEventListener("click", () => {
+    onlyWrongMode = false;
+    startTest();
+  });
+
+  retryWrongBtn.addEventListener("click", () => {
+    onlyWrongMode = true;
+    startTest();
+  });
+
+  downloadPngBtn.addEventListener("click", downloadResultPNG);
+}
 
 // --------------------
 // Start / Restart
@@ -175,7 +241,6 @@ function startTest() {
 
   // какие вопросы берём
   if (onlyWrongMode) {
-    // берём вопросы из прошлой попытки
     const wrongIds = getLastWrongQuestionIds();
     const set = new Set(wrongIds);
 
@@ -188,296 +253,335 @@ function startTest() {
     questions = wrongQuestions.slice();
   } else {
     questions = originalQuestions.slice();
+
+    // перемешивание — если включено
+    const shuffleEnabled = !!testData.settings?.shuffleEnabled;
+    if (shuffleEnabled) {
+      questions = shuffleArray(questions);
+    }
   }
 
-  // перемешивание — только если преподаватель включил
-  const shuffleEnabled = !!testData.settings?.shuffleEnabled;
-  if (shuffleEnabled) {
-    questions = shuffleArray(questions);
-  }
-
-  // UI: показать тест
+  // show test screen
   startScreen.style.display = "none";
   resultScreen.style.display = "none";
   testScreen.style.display = "block";
 
+  btnNext.style.display = "none";
+  explanationBoxEl.style.display = "none";
+
+  btnNext.onclick = nextQuestion;
+
   renderQuestion();
 }
 
-// хранение ошибок последней попытки в sessionStorage
-function saveLastWrongQuestionIds(ids) {
-  sessionStorage.setItem("believe_or_not_last_wrong_ids_v1", JSON.stringify(ids || []));
-}
-function getLastWrongQuestionIds() {
-  try {
-    return JSON.parse(sessionStorage.getItem("believe_or_not_last_wrong_ids_v1") || "[]");
-  } catch {
-    return [];
-  }
-}
-
 // --------------------
-// Render question
+// Render
 // --------------------
 function renderQuestion() {
   const q = questions[currentIndex];
 
-  questionEl.textContent = safeText(q.text);
-  categoryEl.textContent = q.category ? "Категория: " + q.category : "";
-
-  feedbackEl.textContent = "";
-  feedbackEl.className = "feedback";
-
-  btnNext.style.display = "none";
+  // reset UI
   answered = false;
+  btnNext.style.display = "none";
 
-  // explanations hidden by default
   explanationBoxEl.style.display = "none";
+  feedbackEl.textContent = "";
   explanationTextEl.textContent = "";
   explanationImageEl.style.display = "none";
   explanationImageEl.src = "";
 
-  // картинка к вопросу
-  if (q.imageUrl) {
-    questionImageEl.src = q.imageUrl;
+  categoryEl.textContent = q.category ? ("Категория: " + q.category) : "";
+  questionEl.textContent = safeText(q.text);
+
+  // question image
+  const imgUrl = q.imageUrl || "";
+  if (imgUrl) {
+    questionImageEl.src = imgUrl;
     questionImageEl.style.display = "block";
     questionImageEl.onerror = () => {
       questionImageEl.style.display = "none";
+      questionImageEl.src = "";
     };
   } else {
-    questionImageEl.src = "";
     questionImageEl.style.display = "none";
+    questionImageEl.src = "";
   }
 
-  // answers area
+  progressEl.textContent = `Вопрос ${getQuestionNumber(q)} из ${originalQuestions.length}`;
+
+  // answers
   answersAreaEl.innerHTML = "";
 
-  // прогресс
-  progressEl.textContent = `Вопрос ${currentIndex + 1} из ${questions.length}`;
-
-  // отрисовать варианты
-  if (!q.type || q.type === "true_false") {
+  // Поддержка: true_false / multiple_choice / open_answer
+  if (q.type === "true_false") {
     renderTrueFalse(q);
-  } else if (q.type === "multiple_choice") {
-    renderMultipleChoice(q);
-  } else if (q.type === "open_answer") {
-    renderOpenAnswer(q);
-  } else {
-    renderTrueFalse(q);
+    return;
   }
-
-  btnNext.onclick = () => nextQuestion();
-}
-
-// --------------------
-// Render: True/False
-// --------------------
-function renderTrueFalse(q) {
-  const btnTrue = document.createElement("button");
-  btnTrue.className = "answer-btn true-btn";
-  btnTrue.textContent = "✅ Верю";
-  btnTrue.addEventListener("click", () => handleAnswer(q, true));
-
-  const btnFalse = document.createElement("button");
-  btnFalse.className = "answer-btn false-btn";
-  btnFalse.textContent = "❌ Не верю";
-  btnFalse.addEventListener("click", () => handleAnswer(q, false));
-
-  answersAreaEl.appendChild(btnTrue);
-  answersAreaEl.appendChild(btnFalse);
-}
-
-// --------------------
-// Render: Multiple Choice
-// --------------------
-function renderMultipleChoice(q) {
-  const options = Array.isArray(q.options) ? q.options : [];
-  if (!options.length) {
-    const warn = document.createElement("div");
-    warn.style.color = "#b91c1c";
-    warn.style.fontWeight = "800";
-    warn.textContent = "⚠️ У этого вопроса нет вариантов.";
-    answersAreaEl.appendChild(warn);
+  if (q.type === "multiple_choice") {
+    renderMultipleChoice(q);
+    return;
+  }
+  if (q.type === "open_answer") {
+    renderOpenAnswer(q);
     return;
   }
 
-  options.forEach((opt, idx) => {
-    const btn = document.createElement("button");
-    btn.className = "answer-btn option-btn";
-    btn.textContent = safeText(opt);
+  // fallback
+  answersAreaEl.innerHTML = `<div class="subtitle">Неизвестный тип вопроса: ${safeText(q.type)}</div>`;
+}
 
-    btn.addEventListener("click", () => {
-      handleAnswer(q, idx);
-    });
-
-    answersAreaEl.appendChild(btn);
-  });
+function getQuestionNumber(q) {
+  // номер в порядке преподавателя (оригинальный индекс)
+  const idx = originalQuestions.findIndex(x => x.id === q.id);
+  return idx >= 0 ? (idx + 1) : (currentIndex + 1);
 }
 
 // --------------------
-// Render: Open Answer
+// Question types
 // --------------------
-function renderOpenAnswer(q) {
-  const input = document.createElement("input");
-  input.className = "input-open";
-  input.placeholder = "Введи ответ…";
-  input.autocomplete = "off";
+function renderTrueFalse(q) {
+  const wrap = document.createElement("div");
+  wrap.className = "buttons";
 
-  const submit = document.createElement("button");
-  submit.className = "submit-open-btn";
-  submit.textContent = "✅ Ответить";
+  const bTrue = document.createElement("button");
+  bTrue.className = "true-btn";
+  bTrue.textContent = "✅ Верю";
 
-  submit.addEventListener("click", () => {
-    handleAnswer(q, input.value);
+  const bFalse = document.createElement("button");
+  bFalse.className = "false-btn";
+  bFalse.textContent = "❌ Не верю";
+
+  bTrue.onclick = () => submitAnswer(q, "Верю");
+  bFalse.onclick = () => submitAnswer(q, "Не верю");
+
+  wrap.appendChild(bTrue);
+  wrap.appendChild(bFalse);
+  answersAreaEl.appendChild(wrap);
+}
+
+function renderMultipleChoice(q) {
+  const options = Array.isArray(q.options) ? q.options : [];
+
+  const list = document.createElement("div");
+  list.className = "mc-list";
+
+  options.forEach((optText) => {
+    const btn = document.createElement("button");
+    btn.className = "mc-btn";
+    btn.type = "button";
+    btn.textContent = safeText(optText);
+
+    btn.onclick = () => submitAnswer(q, safeText(optText));
+    list.appendChild(btn);
   });
 
-  answersAreaEl.appendChild(input);
-  answersAreaEl.appendChild(submit);
+  // если вдруг options нет — покажем подсказку
+  if (!options.length) {
+    const empty = document.createElement("div");
+    empty.className = "subtitle";
+    empty.textContent = "У этого вопроса нет вариантов ответа.";
+    answersAreaEl.appendChild(empty);
+  } else {
+    answersAreaEl.appendChild(list);
+  }
+}
 
+function renderOpenAnswer(q) {
+  const box = document.createElement("div");
+  box.className = "open-box";
+
+  const input = document.createElement("input");
+  input.className = "open-input";
+  input.type = "text";
+  input.placeholder = "Введи ответ…";
+
+  const btn = document.createElement("button");
+  btn.className = "open-submit";
+  btn.type = "button";
+  btn.textContent = "✅ Ответить";
+
+  btn.onclick = () => submitAnswer(q, input.value);
+
+  box.appendChild(input);
+  box.appendChild(btn);
+  answersAreaEl.appendChild(box);
+
+  // Enter = отправить
   input.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      submit.click();
+      btn.click();
     }
   });
 }
 
 // --------------------
-// Handle answer
+// Check + submit
 // --------------------
-function handleAnswer(q, userAnswer) {
+function isAnswerCorrect(q, userAnswerText) {
+  const correct = safeText(q.correctText);
+
+  if (q.type === "open_answer") {
+    // checkMode: exact / contains
+    const mode = q.checkMode || "exact";
+    const ua = normalize(userAnswerText);
+    const ca = normalize(correct);
+
+    if (mode === "contains") return ua.includes(ca);
+    return ua === ca;
+  }
+
+  // true_false + multiple_choice
+  return normalize(userAnswerText) === normalize(correct);
+}
+
+function submitAnswer(q, userAnswerText) {
   if (answered) return;
   answered = true;
 
-  let isCorrect = false;
-  let correctAnswerReadable = "";
-  let userAnswerReadable = "";
+  const correct = safeText(q.correctText);
+  const isCorrect = isAnswerCorrect(q, userAnswerText);
 
-  if (!q.type || q.type === "true_false") {
-    const correct = !!q.correct;
-    isCorrect = (userAnswer === correct);
-    correctAnswerReadable = correct ? "✅ Верю" : "❌ Не верю";
-    userAnswerReadable = userAnswer ? "✅ Верю" : "❌ Не верю";
-  } else if (q.type === "multiple_choice") {
-    const correctIndex = Number(q.correctIndex || 0);
-    isCorrect = (Number(userAnswer) === correctIndex);
+  if (isCorrect) score++;
 
-    const options = Array.isArray(q.options) ? q.options : [];
-    correctAnswerReadable = safeText(options[correctIndex] ?? "");
-    userAnswerReadable = safeText(options[Number(userAnswer)] ?? "");
-  } else if (q.type === "open_answer") {
-    const correctText = safeText(q.correctText);
-    isCorrect = normalize(userAnswer) === normalize(correctText);
-
-    correctAnswerReadable = correctText;
-    userAnswerReadable = safeText(userAnswer);
-  }
-
-  if (isCorrect) {
-    score++;
-    feedbackEl.textContent = "Верно!";
-    feedbackEl.className = "feedback correct";
-  } else {
-    feedbackEl.textContent = "Неверно.";
-    feedbackEl.className = "feedback incorrect";
-
-    const hasText = !!(q.explanation && q.explanation.trim());
-    const hasImage = !!(q.explanationImageUrl && q.explanationImageUrl.trim());
-
-    if (hasText || hasImage) {
-      explanationBoxEl.style.display = "block";
-
-      if (hasText) explanationTextEl.textContent = q.explanation;
-      else explanationTextEl.textContent = "";
-
-      if (hasImage) {
-        explanationImageEl.src = q.explanationImageUrl;
-        explanationImageEl.style.display = "block";
-        explanationImageEl.onerror = () => explanationImageEl.style.display = "none";
-      } else {
-        explanationImageEl.style.display = "none";
-        explanationImageEl.src = "";
-      }
-    }
-  }
-
-  const originalIndex = originalQuestions.findIndex(x => x.id === q.id);
-  const questionNumber = originalIndex >= 0 ? (originalIndex + 1) : (currentIndex + 1);
-
+  // сохраним результат
   results.push({
     questionId: q.id,
-    questionNumber,
-    type: q.type || "true_false",
+    questionNumber: getQuestionNumber(q),
+    type: q.type,
     text: safeText(q.text),
-    userAnswer: userAnswerReadable,
-    correctAnswer: correctAnswerReadable,
-    isCorrect
+    userAnswer: safeText(userAnswerText),
+    correctAnswer: correct,
+    isCorrect,
   });
 
+  // визуально подсветим (для multiple choice)
   if (q.type === "multiple_choice") {
-    const buttons = answersAreaEl.querySelectorAll("button.option-btn");
-    buttons.forEach((b, idx) => {
-      if (idx === Number(userAnswer)) b.classList.add("selected");
+    const btns = answersAreaEl.querySelectorAll("button.mc-btn");
+    btns.forEach((b) => {
+      const t = normalize(b.textContent);
+      if (t === normalize(correct)) b.classList.add("mc-correct");
+      if (t === normalize(userAnswerText) && !isCorrect) b.classList.add("mc-wrong");
       b.disabled = true;
     });
   }
 
-  if (!q.type || q.type === "true_false") {
+  // для true/false — блокируем кнопки
+  if (q.type === "true_false") {
     const btns = answersAreaEl.querySelectorAll("button");
-    btns.forEach(b => b.disabled = true);
+    btns.forEach(b => (b.disabled = true));
   }
 
+  // для open — тоже блокируем
   if (q.type === "open_answer") {
     const input = answersAreaEl.querySelector("input");
-    const submit = answersAreaEl.querySelector("button");
+    const btn = answersAreaEl.querySelector("button");
     if (input) input.disabled = true;
-    if (submit) submit.disabled = true;
+    if (btn) btn.disabled = true;
+  }
+
+  // показываем пояснение ТОЛЬКО если ошибка
+  if (!isCorrect) {
+    explanationBoxEl.style.display = "block";
+    feedbackEl.textContent = "Неверно.";
+
+    if (q.explanation) {
+      explanationTextEl.textContent = safeText(q.explanation);
+    }
+
+    if (q.explanationImageUrl) {
+      explanationImageEl.src = q.explanationImageUrl;
+      explanationImageEl.style.display = "block";
+      explanationImageEl.onerror = () => {
+        explanationImageEl.style.display = "none";
+        explanationImageEl.src = "";
+      };
+    }
+  } else {
+    explanationBoxEl.style.display = "none";
   }
 
   btnNext.style.display = "inline-flex";
 }
 
-// --------------------
-// Next
-// --------------------
 function nextQuestion() {
   if (!answered) return;
 
   currentIndex++;
   if (currentIndex >= questions.length) {
-    showResults();
+    showResult();
   } else {
     renderQuestion();
   }
 }
 
 // --------------------
-// Results screen
+// Result screen
 // --------------------
-function showResults() {
+function showResult() {
   testScreen.style.display = "none";
-  startScreen.style.display = "none";
   resultScreen.style.display = "block";
 
-  const total = questions.length;
+  const total = results.length;
   const percent = total ? Math.round((score / total) * 100) : 0;
 
-  scoreBigEl.textContent = `Твой результат: ${score} из ${total}`;
+  scoreBigEl.textContent = `${score}/${total}`;
   percentTextEl.textContent = `${percent}%`;
+  resultMetaEl.textContent = `Дата: ${shortDate()} • Вопросов: ${total}`;
 
-  const testName = testData?.name || "Тест";
-  resultMetaEl.textContent = `${testName} • ${shortDate(new Date())}`;
+  drawPercentCircle(percent);
 
-  drawCircle(percent);
+  // ошибки (в порядке номеров вопросов)
+  const wrong = results.filter(r => !r.isCorrect).sort((a, b) => a.questionNumber - b.questionNumber);
+  saveLastWrongQuestionIds(wrong.map(r => r.questionId));
 
-  const wrong = results.filter(r => !r.isCorrect);
-  saveLastWrongQuestionIds(wrong.map(x => x.questionId));
+  errorsListEl.innerHTML = "";
+  if (!wrong.length) {
+    errorsListEl.innerHTML = `<div class="subtitle">✅ Ошибок нет — идеально!</div>`;
+    return;
+  }
 
-  retryWrongBtn.style.display = wrong.length ? "inline-flex" : "none";
-  renderErrors(wrong);
+  wrong.forEach((w) => {
+    const card = document.createElement("div");
+    card.className = "error-card";
+
+    const num = document.createElement("div");
+    num.className = "error-number";
+    num.textContent = `№${w.questionNumber}`;
+
+    const qtext = document.createElement("div");
+    qtext.className = "error-qtext";
+    qtext.textContent = w.text;
+
+    const line1 = document.createElement("div");
+    line1.className = "error-line";
+    line1.innerHTML = `<b>Ответ ученика:</b> ${escapeHtml(w.userAnswer || "—")}`;
+
+    const line2 = document.createElement("div");
+    line2.className = "error-line";
+    line2.innerHTML = `<b>Правильный ответ:</b> ${escapeHtml(w.correctAnswer || "—")}`;
+
+    card.appendChild(num);
+    card.appendChild(qtext);
+    card.appendChild(line1);
+    card.appendChild(line2);
+
+    errorsListEl.appendChild(card);
+  });
 }
 
-function drawCircle(percent) {
+function escapeHtml(str) {
+  return String(str || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function drawPercentCircle(percent) {
+  if (!scoreCanvas) return;
+
   const ctx = scoreCanvas.getContext("2d");
   const w = scoreCanvas.width;
   const h = scoreCanvas.height;
@@ -486,286 +590,133 @@ function drawCircle(percent) {
 
   const cx = w / 2;
   const cy = h / 2;
-  const r = 74;
+  const r = Math.min(w, h) / 2 - 10;
 
+  // bg
   ctx.beginPath();
+  ctx.lineWidth = 12;
+  ctx.strokeStyle = "#eef2ff";
   ctx.arc(cx, cy, r, 0, Math.PI * 2);
-  ctx.strokeStyle = "#e5e7eb";
-  ctx.lineWidth = 14;
   ctx.stroke();
 
+  // arc
   const start = -Math.PI / 2;
-  const end = start + (Math.PI * 2 * (percent / 100));
+  const end = start + (Math.PI * 2) * (percent / 100);
+
   ctx.beginPath();
-  ctx.arc(cx, cy, r, start, end);
+  ctx.lineWidth = 12;
   ctx.strokeStyle = "#4b6bfb";
-  ctx.lineWidth = 14;
   ctx.lineCap = "round";
+  ctx.arc(cx, cy, r, start, end);
   ctx.stroke();
-}
-
-function renderErrors(wrong) {
-  errorsListEl.innerHTML = "";
-
-  if (!wrong.length) {
-    errorsListEl.innerHTML = `
-      <div style="padding:12px;border-radius:14px;border:1px solid #e5e7eb;background:#f9fafb;">
-        ✅ Ошибок нет! Отличная работа 🎉
-      </div>
-    `;
-    return;
-  }
-
-  wrong
-    .sort((a, b) => a.questionNumber - b.questionNumber)
-    .forEach(err => {
-      const card = document.createElement("div");
-      card.className = "error-card";
-
-      card.innerHTML = `
-        <div class="error-head">
-          <span class="error-number">Ошибка #${err.questionNumber}</span>
-        </div>
-
-        <div class="error-qtext">${escapeHTML(err.text)}</div>
-
-        <div class="error-line">
-          <b>Ответ ученика:</b> ${escapeHTML(err.userAnswer)}
-        </div>
-
-        <div class="error-line">
-          <b>Правильный ответ:</b> ${escapeHTML(err.correctAnswer)}
-        </div>
-      `;
-
-      errorsListEl.appendChild(card);
-    });
-}
-
-function escapeHTML(str) {
-  return safeText(str)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
 }
 
 // --------------------
-// PNG Export
+// PNG export
 // --------------------
 async function downloadResultPNG() {
-  const testName = testData?.name || "Тест";
-  const dateStr = shortDate(new Date());
-
-  const total = questions.length;
-  const percent = total ? Math.round((score / total) * 100) : 0;
-
-  const wrong = results
-    .filter(r => !r.isCorrect)
-    .sort((a, b) => a.questionNumber - b.questionNumber);
-
-  // собираем HTML для PNG
-  pngRenderEl.innerHTML = `
-    <div style="font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
-        <div style="font-size:24px;font-weight:900;">${escapeHTML(testName)}</div>
-        <div style="font-size:14px;color:#6b7280;font-weight:800;">${dateStr}</div>
-      </div>
-
-      <div style="margin-top:14px;display:grid;grid-template-columns: 260px 1fr;gap:16px;">
-        <div style="border:1px solid #eef0f8;border-radius:18px;padding:14px;background:#f9fafb;">
-          <div style="font-size:18px;font-weight:900;">Результат</div>
-          <div style="margin-top:6px;font-size:14px;color:#6b7280;">${score} из ${total} (${percent}%)</div>
-
-          <div style="margin-top:12px;display:flex;justify-content:center;">
-            <canvas id="pngCanvas" width="220" height="220"></canvas>
-          </div>
-
-          <div style="margin-top:10px;font-size:13px;color:#6b7280;line-height:1.35;">
-            Учителю можно сохранить этот файл как отчёт.
-          </div>
-        </div>
-
-        <div style="border:1px solid #eef0f8;border-radius:18px;padding:14px;background:#fff;">
-          <div style="font-size:18px;font-weight:900;margin-bottom:10px;">Ошибки</div>
-          ${
-            wrong.length
-              ? wrong.map(err => `
-                <div style="border:1px solid #dde1eb;border-radius:16px;padding:12px;background:#f9fafb;margin-bottom:10px;">
-                  <div style="font-weight:900;color:#b91c1c;background:#fee2e2;border:1px solid #fecaca;padding:3px 10px;border-radius:999px;font-size:13px;">
-                    Ошибка #${err.questionNumber}
-                  </div>
-
-                  <div style="margin-top:8px;font-weight:800;font-size:14px;">
-                    ${escapeHTML(err.text)}
-                  </div>
-
-                  <div style="margin-top:10px;font-size:14px;">
-                    <b>Ответ ученика:</b> ${escapeHTML(err.userAnswer)}
-                  </div>
-
-                  <div style="margin-top:6px;font-size:14px;">
-                    <b>Правильный ответ:</b> ${escapeHTML(err.correctAnswer)}
-                  </div>
-                </div>
-              `).join("")
-              : `
-                <div style="border:1px solid #e5e7eb;border-radius:16px;padding:12px;background:#f9fafb;">
-                  ✅ Ошибок нет! Отличная работа 🎉
-                </div>
-              `
-          }
-        </div>
-      </div>
-    </div>
-  `;
-
-  // показываем блок
-  pngRenderEl.style.display = "block";
-
-  // ждём отрисовку
-  await nextFrame();
-  await nextFrame();
-
-  // рисуем круг в PNG canvas
-  const canvas = pngRenderEl.querySelector("#pngCanvas");
-  drawCircleOnCanvas(canvas, percent);
-
-  await nextFrame();
-
   try {
-    // ✅ html2canvas — самый стабильный способ
-    const canvasResult = await html2canvas(pngRenderEl, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: "#ffffff"
+    const testName = safeText(testData?.name || "Тест");
+    const dateStr = shortDate(new Date());
+    const fileName = `${testName}_${dateStr}.png`.replaceAll(" ", "_");
+
+    // Соберём большой информативный PNG в pngRender
+    const total = results.length;
+    const percent = total ? Math.round((score / total) * 100) : 0;
+
+    const wrong = results.filter(r => !r.isCorrect).sort((a, b) => a.questionNumber - b.questionNumber);
+
+    pngRenderEl.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;">
+        <div>
+          <div style="font-size:22px;font-weight:900;">${escapeHtml(testName)}</div>
+          <div style="font-size:13px;color:#6b7280;margin-top:4px;">
+            Дата: <b>${escapeHtml(dateStr)}</b> • Вопросов: <b>${total}</b>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:24px;font-weight:900;color:#111827;">${percent}%</div>
+          <div style="font-size:13px;color:#6b7280;">${score}/${total}</div>
+        </div>
+      </div>
+
+      <div style="height:12px;"></div>
+
+      <div style="font-size:16px;font-weight:900;margin-bottom:10px;">Ошибки</div>
+
+      ${
+        wrong.length
+          ? wrong.map(w => `
+              <div style="border:1px solid #eef0f8;border-radius:14px;padding:12px;margin-bottom:10px;">
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                  <span style="font-weight:900;color:#b91c1c;background:#fee2e2;border:1px solid #fecaca;padding:2px 10px;border-radius:999px;font-size:12px;">
+                    №${w.questionNumber}
+                  </span>
+                  <span style="font-weight:900;font-size:13px;color:#111827;">${escapeHtml(w.text)}</span>
+                </div>
+
+                <div style="margin-top:8px;font-size:13px;">
+                  <b>Ответ ученика:</b> ${escapeHtml(w.userAnswer || "—")}
+                </div>
+                <div style="margin-top:4px;font-size:13px;">
+                  <b>Правильный ответ:</b> ${escapeHtml(w.correctAnswer || "—")}
+                </div>
+              </div>
+            `).join("")
+          : `<div style="font-size:13px;color:#15803d;font-weight:800;">✅ Ошибок нет — идеально!</div>`
+      }
+
+      <div style="margin-top:10px;font-size:12px;color:#6b7280;">
+        Сгенерировано в “Верю / Не верю”
+      </div>
+    `;
+
+    // Рендерим HTML в SVG -> PNG (без canvas taint)
+    const width = 980;
+    const height = Math.max(420, pngRenderEl.scrollHeight + 40);
+
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
+        <foreignObject x="0" y="0" width="${width}" height="${height}">
+          <div xmlns="http://www.w3.org/1999/xhtml" style="width:${width}px;">
+            ${pngRenderEl.innerHTML}
+          </div>
+        </foreignObject>
+      </svg>
+    `.trim();
+
+    const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
+    const svgUrl = URL.createObjectURL(blob);
+
+    const img = new Image();
+    await new Promise((resolve, reject) => {
+      img.onload = resolve;
+      img.onerror = reject;
+      img.src = svgUrl;
     });
 
-    const pngUrl = canvasResult.toDataURL("image/png");
+    const canvas = document.createElement("canvas");
+    canvas.width = width * 2;
+    canvas.height = height * 2;
+
+    const ctx = canvas.getContext("2d");
+    ctx.scale(2, 2);
+    ctx.drawImage(img, 0, 0);
+
+    URL.revokeObjectURL(svgUrl);
+
+    const pngUrl = canvas.toDataURL("image/png");
     const a = document.createElement("a");
     a.href = pngUrl;
-    a.download = `${sanitizeFileName(testName)}_${dateStr}.png`;
+    a.download = fileName;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
 
   } catch (e) {
-    alert("⚠️ Не удалось скачать PNG.\n\n" + e);
-  } finally {
-    pngRenderEl.style.display = "none";
+    console.warn(e);
+    alert("⚠️ Не удалось скачать PNG. Попробуй ещё раз.");
   }
-}
-
-
-function drawCircleOnCanvas(canvas, percent) {
-  const ctx = canvas.getContext("2d");
-  const w = canvas.width;
-  const h = canvas.height;
-
-  ctx.clearRect(0, 0, w, h);
-
-  const cx = w / 2;
-  const cy = h / 2;
-  const r = 84;
-
-  ctx.beginPath();
-  ctx.arc(cx, cy, r, 0, Math.PI * 2);
-  ctx.strokeStyle = "#e5e7eb";
-  ctx.lineWidth = 16;
-  ctx.stroke();
-
-  const start = -Math.PI / 2;
-  const end = start + Math.PI * 2 * (percent / 100);
-
-  ctx.beginPath();
-  ctx.arc(cx, cy, r, start, end);
-  ctx.strokeStyle = "#4b6bfb";
-  ctx.lineWidth = 16;
-  ctx.lineCap = "round";
-  ctx.stroke();
-
-  ctx.fillStyle = "#111827";
-  ctx.font = "900 34px system-ui";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(`${percent}%`, cx, cy - 6);
-
-  ctx.fillStyle = "#6b7280";
-  ctx.font = "700 14px system-ui";
-  ctx.fillText(`правильных`, cx, cy + 24);
-}
-
-function sanitizeFileName(name) {
-  return safeText(name).replace(/[^\wа-яА-Я0-9]+/g, "_").slice(0, 60) || "result";
-}
-
-async function exportElementToPng(element, fileName) {
-  const width = element.offsetWidth;
-  const height = element.offsetHeight;
-
-  if (!width || !height) {
-    throw new Error("Размер PNG блока равен 0. Проверь отображение элемента.");
-  }
-
-  const clone = element.cloneNode(true);
-
-  const originalCanvases = element.querySelectorAll("canvas");
-  const cloneCanvases = clone.querySelectorAll("canvas");
-
-  originalCanvases.forEach((c, i) => {
-    const data = c.toDataURL("image/png");
-    const img = document.createElement("img");
-    img.src = data;
-    img.style.width = c.width + "px";
-    img.style.height = c.height + "px";
-    if (cloneCanvases[i]) {
-      cloneCanvases[i].replaceWith(img);
-    }
-  });
-
-  const serializer = new XMLSerializer();
-  const html = serializer.serializeToString(clone);
-
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
-      <foreignObject width="100%" height="100%">
-        <div xmlns="http://www.w3.org/1999/xhtml" style="width:${width}px;height:${height}px;">
-          ${html}
-        </div>
-      </foreignObject>
-    </svg>
-  `;
-
-  const svgBlob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
-  const svgUrl = URL.createObjectURL(svgBlob);
-
-  const img = new Image();
-  img.crossOrigin = "anonymous";
-
-  await new Promise((resolve, reject) => {
-    img.onload = resolve;
-    img.onerror = reject;
-    img.src = svgUrl;
-  });
-
-  const canvas = document.createElement("canvas");
-  canvas.width = width * 2;
-  canvas.height = height * 2;
-
-  const ctx = canvas.getContext("2d");
-  ctx.scale(2, 2);
-  ctx.drawImage(img, 0, 0);
-
-  URL.revokeObjectURL(svgUrl);
-
-  const pngUrl = canvas.toDataURL("image/png");
-  const a = document.createElement("a");
-  a.href = pngUrl;
-  a.download = fileName;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
 }
 
 // --------------------
